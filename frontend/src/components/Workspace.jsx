@@ -1,9 +1,14 @@
 import { useState } from "react";
 import WorkspaceCard from "./Workspacecard";
 import CreateWorkspaceModal from "./Workspacemodal";
+import {workspaceStore} from "../store/workspaceStore"
+
 
 function WorkspacePage() {
     const [showModal, setShowModal] = useState(false);
+
+    const {allworkspaces}=workspaceStore();
+
   
     const dummyWorkspaces = [
             {
@@ -44,7 +49,7 @@ function WorkspacePage() {
         {/* Grid Section */}
         <div className="flex-1 overflow-auto px-6 py-4">
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {dummyWorkspaces.map((workspace) => (
+            {allworkspaces.map((workspace) => (
               <WorkspaceCard key={workspace._id} workspace={workspace} />
             ))}
           </div>

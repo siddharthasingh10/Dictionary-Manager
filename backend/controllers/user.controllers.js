@@ -36,9 +36,9 @@ delete userToSend.password;
     const token =jwt.sign({id:user._id},process.env.JWT_SECRET,{expiresIn:"1d"});
     res.cookie("token", token, {
         httpOnly: true,
-        secure: process.env.NODE_ENV === "production", // use secure cookies in production
+        secure: false,
         sameSite: "Strict",
-        maxAge: 7 * 24 * 60 * 60 * 1000 
+        maxAge: 1 * 24 * 60 * 60 * 1000 
       });
     return res.status(201).json({ message: "User created successfully", success: true,user:userToSend });
 
@@ -67,18 +67,58 @@ const login=async(req,res)=>{
             return res.status(400).json({message:"Invalid credentials"});
         }
         const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: "1d" });
-        res.cookie("token", token, {
+       return res.cookie("token", token, {
             httpOnly: true,
-            secure: process.env.NODE_ENV === "production", 
+            secure:false,
             sameSite: "Strict",
             maxAge: 7 * 24 * 60 * 60 * 1000 
-          });
-        return res.status(200).json({ message: "Login successful", success: true, user });
+          }).json({ message: "Login successful", success: true, user });
+          
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: "Internal server error in logging in" });
     }
 }
+const logout=async(req,res)=>{
+  try {
+    const token=req.cookies?.token;
+    if (!token) {
+        return res.status(400).json({ 
+            message: "No token found, user already logged out.",
+            success: false 
+        });
+    }
 
-module.exports = { signup,login };
+    res.clearCookie("token", {
+        httpOnly: true,
+        sameSite: "strict",
+    });
+
+    return res.status(200).json({
+        message: "Logged out successfully.",
+        success: true
+    });
+    
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Internal server error in logging out" });
+  }
+}
+const getUser=async(req,res)=>{
+  try {
+    const userId = req.params.id; 
+    const user = await User.findById(userId).select("-password").populate({path:"workspaces",select:"name"}); // Exclude password field from the response
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    return res.status(200).json({ message: "User fetched successfully", user });
+    
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Internal server error in getting user" });
+  }
+}
+
+
+module.exports = { signup,login,logout,getUser };
 

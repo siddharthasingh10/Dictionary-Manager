@@ -108,6 +108,7 @@ import Signup from "./pages/Signup";
 import Profile from "./components/Profile";
 
 import { userAuthStore } from "./store/userAuthStore";
+import {workspaceStore} from "./store/workspaceStore"
 import Workspace from "./components/Workspace";
 
 const App = () => {
@@ -117,6 +118,10 @@ const App = () => {
     checkAuth();
   }, [checkAuth]);
 
+  useEffect(() => {
+    workspaceStore.getState().fetchAllWorkspaces();
+  }, []);
+
   if (isCheckingAuth && !authUser) {
     return (
       <div className="flex items-center justify-center h-screen">
@@ -124,6 +129,7 @@ const App = () => {
       </div>
     );
   }
+
 
   return (
     <div>

@@ -15,6 +15,8 @@ router.post("/create", [
     body("description").optional(),
 ], userAuth,createWorkspace);
 
+router.get("/all",userAuth,getAllWorkspace);
+
 // router.delete("/delete-workspace/:id", [], userAuth, deleteWorkspace);
 // router.get("/get-all-workspace", [], userAuth, getAllWorkspace);
 // router.put("/edit-workspace/:id", [], userAuth, editWorkspace);
