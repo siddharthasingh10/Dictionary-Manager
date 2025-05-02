@@ -4,31 +4,11 @@ import CreateWorkspaceModal from "./Workspacemodal";
 import {workspaceStore} from "../store/workspaceStore"
 
 
+
 function WorkspacePage() {
     const [showModal, setShowModal] = useState(false);
+    const {usersWorkspaces}=workspaceStore();
 
-    const {allworkspaces}=workspaceStore();
-
-  
-    const dummyWorkspaces = [
-            {
-              _id: "1",
-              title: "GRE Prep Workspace",
-              description: "Words to prepare for GRE verbal section",
-              owner: "John Doe",
-              collaborators: ["Alice", "Bob"],
-              words: new Array(30).fill("word")
-            },
-            {
-              _id: "1",
-              title: "GRE Prep Workspace",
-              description: "Words to prepare for GRE verbal section",
-              owner: "John Doe",
-              collaborators: ["Alice", "Bob"],
-              words: new Array(30).fill("word")
-            }
-           
-          ];
   
     return (
       <div className="flex flex-col h-full bg-base-100">
@@ -49,8 +29,8 @@ function WorkspacePage() {
         {/* Grid Section */}
         <div className="flex-1 overflow-auto px-6 py-4">
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {allworkspaces.map((workspace) => (
-              <WorkspaceCard key={workspace._id} workspace={workspace} />
+            {usersWorkspaces.map((workspace) => (
+              <WorkspaceCard key={workspace._id} workspace={workspace}   />
             ))}
           </div>
         </div>

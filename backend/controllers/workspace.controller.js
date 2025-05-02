@@ -5,7 +5,7 @@ const Workspace = require("../models/workspace.model");
 
 const createWorkspace = async (req, res) => {
     try {
-        const { title, description } = req.body;
+        const { title, description,isPublic } = req.body;
 
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
@@ -39,9 +39,10 @@ const createWorkspace = async (req, res) => {
         const workspace = await Workspace.create({
             title,
             description,
-            author: userId
+            author: userId,
+            isPublic
         });
-        console.log(workspace,user);
+       
 
         // Push workspace to user's list
         user.workspaces.push(workspace._id);
@@ -70,6 +71,7 @@ const deleteWorkspace=async(req,res)=>{
     try {
         const {workspaceId}=req.params;
         const userId=req.id;
+        console.log(workspaceId)
         if(!workspaceId){
             return res.status(400).json({message:"Please provide workspace id"});
         }
@@ -189,6 +191,7 @@ const getAllWorkspacesByUserId=async(req,res)=>{
         });
     }
 }
+
 
 module.exports={
     createWorkspace,

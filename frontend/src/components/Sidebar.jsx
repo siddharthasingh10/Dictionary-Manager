@@ -31,6 +31,9 @@ const Sidebar = () => {
     if(label==="Logout"){
       logoutHandler();
     }
+    if(label==="Social"){
+      navigate("/social");
+    }
   }
 
 

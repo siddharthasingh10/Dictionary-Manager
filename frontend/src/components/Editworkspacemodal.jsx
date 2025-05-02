@@ -1,29 +1,33 @@
-
-
-
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { workspaceStore } from "../store/workspaceStore";
 
-function Workspacemodal({ onClose }) {
-
+function Editworkspacemodal({ onClose, initialData, workspaceId}) {
   const [formData, setFormData] = useState({
     title: "",
     description: "",
     isPublic: false,
   });
 
+  // Populate initial data when modal opens
+  useEffect(() => {
+    if (initialData) {
+      setFormData({
+        title: initialData.title || "",
+        description: initialData.description || "",
+        isPublic: initialData.isPublic || false,
+      });
+    }
+  }, [initialData]);
 
-  const handleCreate = () => {
-
-    workspaceStore.getState().createWorkspace(formData);
-    setFormData({ title: "", description: "", isPublic: false });
+  const handleUpdate = () => {
+    workspaceStore.getState().updateWorkspace(workspaceId, formData);
     onClose();
   };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 backdrop-blur-sm">
       <div className="bg-base-100 border border-white/10 p-8 rounded-xl w-full max-w-xl shadow-lg">
-        <h2 className="text-2xl font-bold mb-4 text-primary">Create New Workspace</h2>
+        <h2 className="text-2xl font-bold mb-4 text-primary">Edit Workspace</h2>
 
         <div className="form-control mb-4">
           <label className="label">
@@ -31,22 +35,22 @@ function Workspacemodal({ onClose }) {
           </label>
           <input
             type="text"
-            placeholder="Enter title..."
             value={formData.title}
             onChange={(e) => setFormData({ ...formData, title: e.target.value })}
             className="input input-bordered"
+            placeholder="Update title..."
           />
         </div>
 
         <div className="form-control mb-4">
           <label className="label">
-            <span className="label-text">Description (Optional)</span>
+            <span className="label-text">Description</span>
           </label>
           <textarea
-            placeholder="Add some notes about your workspace"
             value={formData.description}
             onChange={(e) => setFormData({ ...formData, description: e.target.value })}
             className="textarea textarea-bordered resize-none h-24"
+            placeholder="Update description..."
           />
         </div>
 
@@ -63,25 +67,24 @@ function Workspacemodal({ onClose }) {
         </div>
 
         <div className="flex justify-between items-center">
-          {/* Toggle is already above, so this space balances the layout */}
           <div></div>
 
           <div className="flex gap-3">
             <button className="btn btn-ghost" onClick={onClose}>
               Cancel
             </button>
-            <button className="btn btn-primary" onClick={handleCreate}>
-              Create
+            <button className="btn btn-primary" onClick={handleUpdate}>
+              Update
             </button>
           </div>
         </div>
 
         <p className="mt-4 text-xs text-gray-500 italic">
-          You can add collaborators after creating a workspace.
+          You can manage collaborators after editing this workspace.
         </p>
       </div>
     </div>
   );
 }
 
-export default Workspacemodal;
+export default Editworkspacemodal;

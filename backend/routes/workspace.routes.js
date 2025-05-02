@@ -7,6 +7,7 @@ const {
   deleteWorkspace,
   getAllWorkspace,
   editWorkspace,
+  getAllWorkspacesByUserId
 } = require("../controllers/workspace.controller");
 
 
@@ -16,9 +17,10 @@ router.post("/create", [
 ], userAuth,createWorkspace);
 
 router.get("/all",userAuth,getAllWorkspace);
+router.get("/all/:userId",userAuth,getAllWorkspacesByUserId);
+router.delete("/delete/:workspaceId", userAuth, deleteWorkspace);
 
-// router.delete("/delete-workspace/:id", [], userAuth, deleteWorkspace);
-// router.get("/get-all-workspace", [], userAuth, getAllWorkspace);
-// router.put("/edit-workspace/:id", [], userAuth, editWorkspace);
+
+router.put("/edit/:workspaceId", [], userAuth, editWorkspace);
 
 module.exports = router;

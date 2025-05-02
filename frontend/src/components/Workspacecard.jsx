@@ -1,27 +1,65 @@
 
-
 import { Pencil, Trash2 } from "lucide-react";
+import { workspaceStore } from "../store/workspaceStore";
+import { useState } from "react";
+import Editworkspacemodal from "./Editworkspacemodal";
+import { useNavigate } from "react-router-dom";
 
-function WorkspaceCard({ workspace, onEdit, onDelete }) {
+function WorkspaceCard({ workspace }) {
+  const [showEditModal, setShowEditModal] = useState(false);
+  // console.log(workspace);
+
+  const navigate = useNavigate();
+
+
+const clickHandler = () => {
+  console.log(workspace._id);
+  
+    navigate(`/dictionary/${workspace._id}`);
+
+  
+
+}
+
+  const initialData = {
+    title: workspace.title,
+    description: workspace.description,
+    isPublic: workspace.isPublic,
+  };
+
+  const deleteHandler = async () => {
+    workspaceStore.getState().deleteWorkspace(workspace._id);
+  };
+
   return (
-    <div className="relative border p-4 rounded-md shadow hover:shadow-lg transition cursor-pointer bg-base-100">
-
-      {/* Title + Buttons in same row, properly aligned */}
-      <div className="flex justify-between items-center mb-2">
-        <h3 className="text-xl font-semibold text-blue-700">
-          {workspace.title}
-        </h3>
+    <div  onClick={clickHandler}
+     className="relative border p-4 rounded-xl shadow-md hover:shadow-xl transition cursor-pointer bg-base-100 space-y-2">
+      
+      {/* Title + Public/Private Badge + Buttons */}
+      <div className="flex justify-between items-start">
+        <div className="flex items-center gap-3">
+          <h3 className="text-xl font-semibold text-primary">
+            {workspace.title}
+          </h3>
+          <span
+            className={`badge px-3 py-1 text-xs font-semibold ${
+              workspace.isPublic ? "badge-success" : "badge-ghost"
+            }`}
+          >
+            {workspace.isPublic ? "Public" : "Private"}
+          </span>
+        </div>
 
         <div className="flex space-x-2">
           <button
-            onClick={() => onEdit(workspace)}
+            onClick={() => setShowEditModal(true)}
             className="btn btn-xs btn-outline btn-primary tooltip"
             data-tip="Edit"
           >
             <Pencil className="w-4 h-4" />
           </button>
           <button
-            onClick={() => onDelete(workspace)}
+            onClick={deleteHandler}
             className="btn btn-xs btn-outline btn-error tooltip"
             data-tip="Delete"
           >
@@ -30,13 +68,32 @@ function WorkspaceCard({ workspace, onEdit, onDelete }) {
         </div>
       </div>
 
-      <p className="text-gray-600 text-sm mb-2">{workspace.description}</p>
+      {/* Description */}
+      {workspace.description && (
+        <p className="text-gray-500 text-sm">{workspace.description}</p>
+      )}
 
-      <div className="text-sm text-gray-500">
-        <div><strong>Owner:</strong> {workspace.owner}</div>
-        <div><strong>Collaborators:</strong> {workspace.collaborators.length}</div>
-        <div><strong>Words:</strong> {workspace.words.length}</div>
+      {/* Metadata */}
+      <div className="text-sm text-gray-400 space-y-1">
+        <div>
+          <strong>Owner:</strong> {workspace.author.fullName}
+        </div>
+        <div>
+          <strong>Collaborators:</strong> {workspace.collaborators.length}
+        </div>
+        <div>
+          <strong>Words:</strong> {workspace.words.length}
+        </div>
       </div>
+
+      {/* Edit Modal */}
+      {showEditModal && (
+        <Editworkspacemodal
+          onClose={() => setShowEditModal(false)}
+          initialData={initialData}
+          workspaceId={workspace._id} 
+        />
+      )}
     </div>
   );
 }
