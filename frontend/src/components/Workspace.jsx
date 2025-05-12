@@ -1,6 +1,6 @@
 import { useState } from "react";
 import WorkspaceCard from "./Workspacecard";
-import CreateWorkspaceModal from "./Workspacemodal";
+import Workspacemodal from "./Workspacemodal";
 import {workspaceStore} from "../store/workspaceStore"
 
 
@@ -35,7 +35,7 @@ function WorkspacePage() {
           </div>
         </div>
   
-        {showModal && <CreateWorkspaceModal onClose={() => setShowModal(false)} />}
+        {showModal && <Workspacemodal onClose={() => setShowModal(false)} />}
       </div>
     );
   }

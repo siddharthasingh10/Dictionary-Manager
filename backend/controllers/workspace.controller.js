@@ -151,16 +151,19 @@ const getWorkspaceById=async(req,res)=>{
     try {
         const {workspaceId}=req.params;
         const userId=req.id;
+        const author=await User.findById(userId);
+        // console.log(author.email)
+
         if(!workspaceId){
             return res.status(400).json({message:"Please provide workspace id"});
         }
-        const workspace=await Workspace.findById(workspaceId).populate({path:"author",select:"fullName email"});
+        const workspace=await Workspace.findById(workspaceId).populate({path:"author",select:"fullName email"}).populate({path:"collaborators",select:"fullName email"}).populate({path:"words",select:"word"});
         if(!workspace){
             return res.status(404).json({message:"Workspace not found"});
         }
-        if(workspace.author.toString()!==userId.toString()){
-            return res.status(403).json({message:"You are not authorized to view this workspace"});
-        }
+       
+       
+       
         res.status(200).json({message:"Workspace found",success:true,workspace});
         
     } catch (error) {

@@ -1,65 +1,71 @@
-
-
-
 import React, { useState, useEffect } from 'react';
-import { FaStar, FaRegStar, FaSortAmountDown, FaFilter } from 'react-icons/fa';
+import { FaStar, FaRegStar, FaSortAmountDown, FaFilter, FaTrash } from 'react-icons/fa';
+import WordCreateModal from './WordCreateModal';
+import { wordStore } from '../store/wordStore';
+import { toast } from "react-hot-toast";
 
 const VocabularyTable = () => {
-  const [data, setData] = useState([
-    {
-      word: 'Abate hugnuerigho nerigjohejrig',
-      meaning: 'To become less intense or widespread',
-      level: 'E',
-      status: 'Remembered',
-      example: 'The storm suddenly abated.',
-      starred: true,
-    },
-    {
-      word: 'Belligerent',
-      meaning: 'Hostile and aggressive',
-      level: 'M',
-      status: 'Not remembered',
-      example: 'He was belligerent when someone cut him off.',
-      starred: false,
-    },
-  ]);
+  const {
+    words,
+    isLoading,
+    setWords,
+    updateWord,
+    deleteWord,
+    toggleFavorite
+  } = wordStore();
 
+  const [showModal, setShowModal] = useState(false);
   const [editIndex, setEditIndex] = useState(null);
   const [edited, setEdited] = useState({});
-  const [sortBy, setSortBy] = useState(null);
 
+  console.log(words)
+  // Handle word deletion
+  const handleDelete = async (wordId) => {
+    if (window.confirm('Are you sure you want to delete this word?')) {
+      try {
+        await deleteWord(wordId);
+        toast.success('Word deleted successfully');
+      } catch (error) {
+        toast.error(error.message || 'Failed to delete word');
+      }
+    }
+  };
+
+  // Handle word update
+  const handleSave = async (index) => {
+    const wordToUpdate = words[index];
+    try {
+      console.log('Updating word:', wordToUpdate._id, edited);
+      await updateWord(wordToUpdate._id, edited);
+      setEditIndex(null);
+      toast.success('Word updated successfully');
+    } catch (error) {
+      toast.error(error.message || 'Failed to update word');
+    }
+  };
+
+  // Setup edit mode
   const handleEdit = (index) => {
     setEditIndex(index);
-    setEdited(data[index]);
+    setEdited({ ...words[index] });
   };
 
-  const handleSave = (index) => {
-    const newData = [...data];
-    newData[index] = edited;
-    setData(newData);
-    setEditIndex(null);
-  };
-
+  // Handle field changes during edit
   const handleChange = (e) => {
     setEdited({ ...edited, [e.target.name]: e.target.value });
   };
 
-  const toggleStar = (index) => {
-    const newData = [...data];
-    newData[index].starred = !newData[index].starred;
-    setData(newData);
-  };
-
-  const getLevelLabel = (letter) => {
-    switch (letter) {
-      case 'E': return 'Easy';
-      case 'M': return 'Medium';
-      case 'H': return 'Hard';
-      default: return '';
+  // Toggle favorite status
+  const handleFavorite = async (wordId, currentStatus) => {
+    try {
+      console.log('Toggling favorite for word:', wordId, currentStatus);
+      await toggleFavorite(wordId, !currentStatus);
+    } catch (error) {
+      toast.error(error.message || 'Failed to update favorite status');
     }
   };
 
-  // Handle textarea resize on input change and initial render
+  // Textarea auto-resize helper
   const handleTextareaResize = (textarea) => {
     if (textarea) {
       textarea.style.height = 'auto';
@@ -67,48 +73,71 @@ const VocabularyTable = () => {
     }
   };
 
-  // Effect to resize textareas when editing starts
   useEffect(() => {
     if (editIndex !== null) {
-      const meaningTextarea = document.querySelector(`textarea[name="meaning"][data-index="${editIndex}"]`);
+      const definitionTextarea = document.querySelector(`textarea[name="definition"][data-index="${editIndex}"]`);
       const exampleTextarea = document.querySelector(`textarea[name="example"][data-index="${editIndex}"]`);
-      
-      if (meaningTextarea) handleTextareaResize(meaningTextarea);
+
+      if (definitionTextarea) handleTextareaResize(definitionTextarea);
       if (exampleTextarea) handleTextareaResize(exampleTextarea);
     }
   }, [editIndex]);
 
+  // Helper for level display
+  const getLevelLabel = (level) => {
+    switch (level) {
+      case 'Easy': return 'E';
+      case 'Medium': return 'M';
+      case 'Hard': return 'H';
+      default: return '';
+    }
+  };
+
+
   return (
     <div className="p-6 bg-base-200 min-h-screen text-sm">
       <div className="flex justify-between items-center mb-4">
-        <h1 className="text-2xl font-bold">📚 Vocabulary Table</h1>
+        <button
+          onClick={() => setShowModal(true)}
+          className='btn btn-primary btn-sm'
+          disabled={isLoading}
+        >
+          {isLoading ? 'Loading...' : '+ Add New Word'}
+        </button>
+
         <div className="flex gap-2">
-          <button className="btn btn-sm btn-outline btn-success">
+          <button className="btn btn-sm btn-outline btn-success" disabled={isLoading}>
             <FaSortAmountDown />
           </button>
-          <button className="btn btn-sm btn-outline btn-info">
+          <button className="btn btn-sm btn-outline btn-info" disabled={isLoading}>
             <FaFilter />
           </button>
         </div>
       </div>
 
       <div className="overflow-x-auto rounded-lg shadow-lg">
-        <div className="grid grid-cols-[40px_180px_250px_100px_160px_1fr_40px] bg-neutral text-neutral-content p-2 font-semibold text-left text-sm">
+        <div className="grid grid-cols-[40px_180px_250px_100px_160px_1fr_80px] bg-neutral text-neutral-content p-2 font-semibold text-left text-sm">
           <div>#</div>
           <div className="flex items-center gap-1">Word</div>
-          <div>Meaning</div>
+          <div>Definition</div>
           <div className="text-center">Level</div>
           <div className="text-center">Status</div>
           <div>Example</div>
-          <div></div>
+          <div>Actions</div>
         </div>
 
-        {data.map((word, index) => (
-          <div key={index} className=" grid grid-cols-[40px_180px_250px_100px_160px_1fr_40px] items-center border-b border-base-300  p-2">
+        {words.map((word, index) => (
+          <div key={index} className="grid grid-cols-[40px_180px_250px_100px_160px_1fr_80px] items-center border-b border-base-300 p-2">
             <div>{index + 1}</div>
             <div className="flex items-center gap-2">
-              <button onClick={() => toggleStar(index)}>
-                {word.starred ? <FaStar className="text-yellow-400" /> : <FaRegStar />}
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleFavorite(word._id, !word.favorite);
+                }}
+                disabled={isLoading}
+              >
+                {word.favorite ? <FaStar className="text-yellow-400" /> : <FaRegStar />}
               </button>
               {editIndex === index ? (
                 <textarea
@@ -117,8 +146,8 @@ const VocabularyTable = () => {
                   value={edited.word}
                   onChange={handleChange}
                   onInput={(e) => handleTextareaResize(e.target)}
-                  // className="input input-sm input-bordered w-full"
-                   className="textarea textarea-sm textarea-bordered w-full resize-none overflow-hidden"
+                  className="textarea textarea-sm textarea-bordered w-full resize-none overflow-hidden"
+                  disabled={isLoading}
                 />
               ) : (
                 <span className="break-words">{word.word}</span>
@@ -127,16 +156,17 @@ const VocabularyTable = () => {
             <div>
               {editIndex === index ? (
                 <textarea
-                  name="meaning"
-                  value={edited.meaning}
+                  name="definition"
+                  value={edited.definition}
                   onChange={handleChange}
                   onInput={(e) => handleTextareaResize(e.target)}
                   data-index={index}
                   className="textarea textarea-sm textarea-bordered w-full resize-none overflow-hidden"
                   style={{ minHeight: '40px' }}
+                  disabled={isLoading}
                 />
               ) : (
-                <span className="break-words whitespace-pre-line">{word.meaning}</span>
+                <span className="break-words whitespace-pre-line">{word.definition}</span>
               )}
             </div>
             <div className="text-center">
@@ -146,23 +176,23 @@ const VocabularyTable = () => {
                   value={edited.level}
                   onChange={handleChange}
                   className="select select-sm select-bordered w-full"
+                  disabled={isLoading}
                 >
-                  <option value="E">Easy</option>
-                  <option value="M">Medium</option>
-                  <option value="H">Hard</option>
+                  <option value="Easy">Easy</option>
+                  <option value="Medium">Medium</option>
+                  <option value="Hard">Hard</option>
                 </select>
               ) : (
-                <span className="tooltip" data-tip={getLevelLabel(word.level)}>
+                <span className="tooltip" data-tip={word.level}>
                   <span
-                    className={`font-bold ${
-                      word.level === 'E'
+                    className={`font-bold ${word.level === 'Easy'
                         ? 'text-green-500'
-                        : word.level === 'M'
-                        ? 'text-yellow-400'
-                        : 'text-red-500'
-                    }`}
+                        : word.level === 'Medium'
+                          ? 'text-yellow-400'
+                          : 'text-red-500'
+                      }`}
                   >
-                    {word.level}
+                    {getLevelLabel(word.level)}
                   </span>
                 </span>
               )}
@@ -174,10 +204,10 @@ const VocabularyTable = () => {
                   value={edited.status}
                   onChange={handleChange}
                   className="select select-sm select-bordered w-full"
+                  disabled={isLoading}
                 >
                   <option value="Remembered">Remembered</option>
                   <option value="Not remembered">Not remembered</option>
-                  <option value="Learning">Learning</option>
                 </select>
               ) : (
                 <span
@@ -197,243 +227,53 @@ const VocabularyTable = () => {
                   data-index={index}
                   className="textarea textarea-sm textarea-bordered w-full resize-none overflow-hidden"
                   style={{ minHeight: '40px' }}
+                  disabled={isLoading}
                 />
               ) : (
                 <span className="whitespace-pre-line">{word.example}</span>
               )}
             </div>
-            <div className="text-right">
+            <div className="flex justify-end gap-1">
               {editIndex === index ? (
                 <button
                   onClick={() => handleSave(index)}
                   className="btn btn-xs btn-success"
+                  disabled={isLoading}
                 >
-                  💾
+                  {isLoading ? '...' : '💾Save'}
                 </button>
               ) : (
-                <button
-                  onClick={() => handleEdit(index)}
-                  className="btn btn-xs btn-ghost"
-                >
-                  ✏️
-                </button>
+                <>
+                  <button
+                    onClick={() => handleEdit(index)}
+                    className="btn btn-xs btn-ghost"
+                    disabled={isLoading}
+                  >
+                    ✏️
+                  </button>
+                  <button
+                    onClick={() => handleDelete(word._id)}
+                    className="btn btn-xs btn-ghost text-error"
+                    disabled={isLoading}
+                  >
+                    <FaTrash />
+                  </button>
+                </>
               )}
             </div>
           </div>
         ))}
       </div>
+
+      {showModal && (
+        <WordCreateModal
+          onClose={() => setShowModal(false)}
+          onWordCreated={(newWord) => setWords([...words, newWord])}
+        />
+      )}
     </div>
   );
 };
 
 export default VocabularyTable;
 
-// import React, { useState, useEffect } from 'react';
-// import { FaStar, FaRegStar, FaSortAmountDown, FaFilter } from 'react-icons/fa';
-
-// const VocabularyTable = () => {
-//   const [data, setData] = useState([
-//     {
-//       word: 'Abate hugnuerigho nerigjohejrig',
-//       meaning: 'To become less intense or widespread',
-//       level: 'E',
-//       status: 'Remembered',
-//       example: 'The storm suddenly abated.',
-//       starred: true,
-//     },
-//     {
-//       word: 'Belligerent',
-//       meaning: 'Hostile and aggressive',
-//       level: 'M',
-//       status: 'Not remembered',
-//       example: 'He was belligerent when someone cut him off.',
-//       starred: false,
-//     },
-//   ]);
-
-//   const [editIndex, setEditIndex] = useState(null);
-//   const [edited, setEdited] = useState({});
-//   const [sortBy, setSortBy] = useState(null);
-
-//   const handleEdit = (index) => {
-//     setEditIndex(index);
-//     setEdited(data[index]);
-//   };
-
-//   const handleSave = (index) => {
-//     const newData = [...data];
-//     newData[index] = edited;
-//     setData(newData);
-//     setEditIndex(null);
-//   };
-
-//   const handleChange = (e) => {
-//     setEdited({ ...edited, [e.target.name]: e.target.value });
-//   };
-
-//   const toggleStar = (index) => {
-//     const newData = [...data];
-//     newData[index].starred = !newData[index].starred;
-//     setData(newData);
-//   };
-
-//   const getLevelLabel = (letter) => {
-//     switch (letter) {
-//       case 'E': return 'Easy';
-//       case 'M': return 'Medium';
-//       case 'H': return 'Hard';
-//       default: return '';
-//     }
-//   };
-
-//   // Handle textarea resize on input change
-//   const handleResize = (e) => {
-//     e.target.style.height = 'auto';  // Reset height to auto to adjust it for new content
-//     e.target.style.height = `${e.target.scrollHeight}px`;  // Set height based on content
-//   };
-
-//   return (
-//     <div className="p-6 bg-base-200 min-h-screen text-sm">
-//       <div className="flex justify-between items-center mb-4">
-//         <h1 className="text-2xl font-bold">📚 Vocabulary Table</h1>
-//         <div className="flex gap-2">
-//           <button className="btn btn-sm btn-outline btn-success">
-//             <FaSortAmountDown />
-//           </button>
-//           <button className="btn btn-sm btn-outline btn-info">
-//             <FaFilter />
-//           </button>
-//         </div>
-//       </div>
-
-//       <div className="overflow-x-auto rounded-lg shadow-lg">
-//         <div className="grid grid-cols-[40px_180px_250px_100px_160px_1fr_40px] bg-neutral text-neutral-content p-2 font-semibold text-left text-sm">
-//           <div>#</div>
-//           <div className="flex items-center gap-1">Word</div>
-//           <div>Meaning</div>
-//           <div className="text-center">Level</div>
-//           <div className="text-center">Status</div>
-//           <div>Example</div>
-//           <div></div>
-//         </div>
-
-//         {data.map((word, index) => (
-//           <div key={index} className="grid grid-cols-[40px_180px_250px_100px_160px_1fr_40px] items-center border-b border-base-300 p-2">
-//             <div>{index + 1}</div>
-//             <div className="flex items-center gap-2">
-//               <button onClick={() => toggleStar(index)}>
-//                 {word.starred ? <FaStar className="text-yellow-400" /> : <FaRegStar />}
-//               </button>
-//               {editIndex === index ? (
-//                 <input
-//                   type="text"
-//                   name="word"
-//                   value={edited.word}
-//                   onChange={handleChange}
-//                   className="input input-sm input-bordered w-full"
-//                 />
-//               ) : (
-//                 <span className="break-words">{word.word}</span>
-//               )}
-//             </div>
-//             <div>
-//               {editIndex === index ? (
-//                 <textarea
-//                   name="meaning"
-//                   value={edited.meaning}
-//                   onChange={handleChange}
-//                   onInput={handleResize}  // Call resize function on input
-//                   className="textarea textarea-sm textarea-bordered w-full resize-none"
-//                   rows={1}  // This ensures it starts with a single row, and it expands based on content
-//                 />
-//               ) : (
-//                 <span className="break-words">{word.meaning}</span>
-//               )}
-//             </div>
-//             <div className="text-center">
-//               {editIndex === index ? (
-//                 <select
-//                   name="level"
-//                   value={edited.level}
-//                   onChange={handleChange}
-//                   className="select select-sm select-bordered w-full"
-//                 >
-//                   <option value="E">Easy</option>
-//                   <option value="M">Medium</option>
-//                   <option value="H">Hard</option>
-//                 </select>
-//               ) : (
-//                 <span className="tooltip" data-tip={getLevelLabel(word.level)}>
-//                   <span
-//                     className={`font-bold ${
-//                       word.level === 'E'
-//                         ? 'text-green-500'
-//                         : word.level === 'M'
-//                         ? 'text-yellow-400'
-//                         : 'text-red-500'
-//                     }`}
-//                   >
-//                     {word.level}
-//                   </span>
-//                 </span>
-//               )}
-//             </div>
-//             <div className="text-center font-semibold">
-//               {editIndex === index ? (
-//                 <select
-//                   name="status"
-//                   value={edited.status}
-//                   onChange={handleChange}
-//                   className="select select-sm select-bordered w-full"
-//                 >
-//                   <option value="Remembered">Remembered</option>
-//                   <option value="Not remembered">Not remembered</option>
-//                   <option value="Learning">Learning</option>
-//                 </select>
-//               ) : (
-//                 <span
-//                   className={word.status === 'Remembered' ? 'text-green-500' : 'text-red-500'}
-//                 >
-//                   {word.status}
-//                 </span>
-//               )}
-//             </div>
-//             <div>
-//               {editIndex === index ? (
-//                 <textarea
-//                   name="example"
-//                   value={edited.example}
-//                   onChange={handleChange}
-//                   onInput={handleResize}  // Call resize function on input
-//                   className="textarea textarea-sm textarea-bordered w-full resize-none"
-//                   rows={1}
-//                 />
-//               ) : (
-//                 <span>{word.example}</span>
-//               )}
-//             </div>
-//             <div className="text-right">
-//               {editIndex === index ? (
-//                 <button
-//                   onClick={() => handleSave(index)}
-//                   className="btn btn-xs btn-success"
-//                 >
-//                   💾
-//                 </button>
-//               ) : (
-//                 <button
-//                   onClick={() => handleEdit(index)}
-//                   className="btn btn-xs btn-ghost"
-//                 >
-//                   ✏️
-//                 </button>
-//               )}
-//             </div>
-//           </div>
-//         ))}
-//       </div>
-//     </div>
-//   );
-// };
-
-// export default VocabularyTable;

@@ -7,6 +7,7 @@ dotenv.config();
 const app = express();
 const userRoutes = require('./routes/user.rotes');
 const workspaceRoutes = require('./routes/workspace.routes');
+const wordRoutes = require('./routes/word.routes');
 const connectDB=require('./utils/db');
 const PORT=process.env.PORT || 3000;
 // app.use(cors());
@@ -21,7 +22,7 @@ app.use(cors({
 
 app.use("/user",userRoutes);
 app.use("/workspace",workspaceRoutes);
-// app.use("/word",wordRoutes);
+app.use("/word",wordRoutes);
 connectDB();
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);

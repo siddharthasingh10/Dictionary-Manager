@@ -5,15 +5,18 @@ import { useState } from "react";
 import Editworkspacemodal from "./Editworkspacemodal";
 import { useNavigate } from "react-router-dom";
 
+
 function WorkspaceCard({ workspace }) {
   const [showEditModal, setShowEditModal] = useState(false);
+  // const { fetchWorkspaceById } = workspaceStore();
   // console.log(workspace);
 
   const navigate = useNavigate();
 
 
 const clickHandler = () => {
-  console.log(workspace._id);
+  // console.log(workspace._id);
+  workspaceStore.getState().fetchWorkspaceById(workspace._id);
   
     navigate(`/dictionary/${workspace._id}`);
 

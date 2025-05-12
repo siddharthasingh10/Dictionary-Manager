@@ -11,23 +11,21 @@ import Signup from "./pages/Signup";
 import Profile from "./components/Profile";
 
 import { userAuthStore } from "./store/userAuthStore";
-import {workspaceStore} from "./store/workspaceStore"
+
 import Workspace from "./components/Workspace";
 import Social from "./components/Social";
 import VocabularyTable from "./components/VocabularyTable";
+import DictionaryOverview from "./components/DictionaryOverview";
 
 const App = () => {
-  const { authUser, checkAuth, isCheckingAuth } = userAuthStore();
+  const { authUser, isCheckingAuth, } = userAuthStore();
   
 
-  useEffect(() => {
-    checkAuth();
-  }, [checkAuth]);
 
   useEffect(() => {
-    workspaceStore.getState().fetchAllWorkspaces();
-    workspaceStore.getState().fetchUsersWorkspaces(authUser?._id);
+    userAuthStore.getState().initialize();
   }, []);
+
 
   if (isCheckingAuth && !authUser) {
     return (
@@ -54,11 +52,11 @@ const App = () => {
        
         {authUser && (
           <Route element={<Mainlayout />}>
-            <Route path="/" element={<Profile />} />
+            <Route path="/" element={<Social />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/workspace" element={<Workspace />} />
             <Route path="/social" element={<Social />} />
-            <Route path="/dictionary/:id" element={<VocabularyTable />} />
+            <Route path="/dictionary/:id" element={<DictionaryOverview />} />
 
           </Route>
         )}

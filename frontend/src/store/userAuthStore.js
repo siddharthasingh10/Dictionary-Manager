@@ -2,7 +2,7 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { toast } from "react-hot-toast";
 import axios from "axios";
-
+import { workspaceStore } from "./workspaceStore"; // ✅ Correct import
 
 
 export const userAuthStore = create(
@@ -67,10 +67,68 @@ export const userAuthStore = create(
                 }
               },
               
-            checkAuth: async () => { },
+           
+
+
+// checkAuth: async () => {
+//   try {
+//     const res = await axios.get("http://localhost:2121/user/me", {
+//       withCredentials: true, 
+//     });
+
+  
+//     const user = res.data;
+//     set({ authUser: user, isCheckingAuth: false });
+
+//   } catch (error) {
+//     console.error("Auth check failed:", error.message);
+
+
+//     if (error.response?.status === 401) {
+//       set({ authUser: null, isCheckingAuth: false });
+//     } else {
+    
+//       set({ authUser: null, isCheckingAuth: false });
+//     }
+//   }
+// },
+checkAuth: async () => {
+  set({ isCheckingAuth: true }); // ✅ ye zaroori hai
+  try {
+    const res = await axios.get("http://localhost:2121/user/me", {
+      withCredentials: true,
+    });
+    set({ authUser: res.data, isCheckingAuth: false });
+  } catch (error) {
+    console.error("Auth check failed:", error.message);
+    set({ authUser: null, isCheckingAuth: false });
+  }
+}
+,
+initialize: async () => {
+  set({ isCheckingAuth: true });
+  try {
+    const res = await axios.get("http://localhost:2121/user/me", {
+      withCredentials: true,
+    });
+  
+    set({ authUser: res.data.user });
+    
+    // Fetch workspaces after auth is confirmed
+    if (res.data) {
+      await workspaceStore.getState().fetchAllWorkspaces();
+      await workspaceStore.getState().fetchUsersWorkspaces(res.data.user._id);
+    }
+  } catch (error) {
+    set({ authUser: null });
+  } finally {
+    set({ isCheckingAuth: false });
+  }
+}
         }),
         {
             name: "userAuthStore",
+            getStorage: () => localStorage,
         }
     )
 );

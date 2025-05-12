@@ -67,11 +67,12 @@ const login=async(req,res)=>{
             return res.status(400).json({message:"Invalid credentials"});
         }
         const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: "1d" });
+        user.password = undefined;
        return res.cookie("token", token, {
             httpOnly: true,
             secure:false,
             sameSite: "Strict",
-            maxAge: 7 * 24 * 60 * 60 * 1000 
+            maxAge: 7* 24 * 60 * 60 * 1000 
           }).json({ message: "Login successful", success: true, user });
           
     } catch (error) {
@@ -118,7 +119,22 @@ const getUser=async(req,res)=>{
     res.status(500).json({ message: "Internal server error in getting user" });
   }
 }
+const getMe=async(req,res)=>{
+  try {
 
+    const userId = req.user._id; 
+   
+  
+    const user = await User.findById(userId).select("-password").populate({path:"workspaces",select:"name"}); 
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    } 
+    return res.status(200).json({ message: "User fetched successfully", user });  
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Internal server error in getting user" });
+  }
+}
 
-module.exports = { signup,login,logout,getUser };
+module.exports = { signup,login,logout,getUser,getMe };
 
