@@ -18,7 +18,7 @@ const VocabularyTable = () => {
   const [editIndex, setEditIndex] = useState(null);
   const [edited, setEdited] = useState({});
 
-  console.log(words)
+  // console.log(words)
   // Handle word deletion
   const handleDelete = async (wordId) => {
     if (window.confirm('Are you sure you want to delete this word?')) {

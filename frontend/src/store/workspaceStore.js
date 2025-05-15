@@ -119,31 +119,58 @@ export const workspaceStore = create(
           set({ isLoading: false });
         }
       },
-      addCollaborators:async(payload)=>{
-        try {
-          const { workspaceId, friendIds,emails } = payload;
-          if (!workspaceId) {
-            toast.error("Please provide workspace id");
-            return;
-          }
-          
-          const res = await axios.post(`http://localhost:2121/workspace/addCollaborator/${workspaceId}`, { userId }, {
-            withCredentials: true,
-          });
-          set((state) => ({
-            allworkspaces: state.allworkspaces.map((w) =>
-              w._id === workspaceId ? res.data.workspace : w
-            ),
-            usersWorkspaces: state.usersWorkspaces.map((w) =>
-              w._id === workspaceId ? res.data.workspace : w
-            ),
-          }));
-          toast.success("Collaborator added successfully!");
-        } catch (error) {
-          toast.error(error?.response?.data?.message || "Failed to add collaborators");
-          console.error("Add collaborators error:", error);
-        }
-      }
+
+
+addCollaborators: async (payload) => {
+  try {
+    const { workspaceId, friendIds, emails } = payload;
+    console.log("Adding collaborators with payload:", payload);
+    console.log("Workspace ID:", workspaceId);
+    console.log("Friend IDs:", friendIds);
+    console.log("Emails:", emails);
+    if (!workspaceId) {
+      toast.error("Please provide workspace id");
+      return;
+    }
+
+    const res = await axios.post(
+      `http://localhost:2121/workspace/add-collaborators`,
+      { workspaceId, emails, friendIds },
+      { withCredentials: true }
+    );
+
+    const updatedWorkspace = res.data.updatedWorkspace;
+
+
+    // Update all relevant parts of Zustand store
+    set((state) => {
+      const updatedAll = state.allworkspaces.map((w) =>
+        w._id === workspaceId ? updatedWorkspace : w
+      );
+      const updatedUser = state.usersWorkspaces.map((w) =>
+        w._id === workspaceId ? updatedWorkspace : w
+      );
+
+      const isSelected = state.selectedWorkspace?._id === workspaceId;
+
+      return {
+        allworkspaces: updatedAll,
+        usersWorkspaces: updatedUser,
+        selectedWorkspace: isSelected ? updatedWorkspace : state.selectedWorkspace,
+      };
+    });
+
+    // ✅ Optional but recommended: re-fetch full workspace to ensure complete sync
+    await get().fetchWorkspaceById(workspaceId);
+
+    toast.success("Collaborators added successfully!");
+  } catch (error) {
+    toast.error(error?.response?.data?.error || "Failed to add collaborators");
+    console.error("Add collaborators error:", error);
+  }
+},
+
+
 
     }),
     {

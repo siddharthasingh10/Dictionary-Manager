@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { workspaceStore } from "../store/workspaceStore";
 
-export default function CollabModal({ friends, onClose }) {
 
-    const { selectedWorkspace } = workspaceStore();
+export default function CollabModal({ friends, onClose }) {
+    
+    const { selectedWorkspace, addCollaborators } = workspaceStore();
     const [email, setEmail] = useState("");
     const [selectedFriends, setSelectedFriends] = useState([]);
     const [collaborators, setCollaborators] = useState([]);
@@ -23,28 +24,47 @@ export default function CollabModal({ friends, onClose }) {
         }
     };
 
-    const handleFinalAdd = async () => {
-        const payload = {
-            workspaceId: selectedWorkspace._id,
-            emails: collaborators,
-            friendIds: selectedFriends,
-        };
+    // const handleFinalAdd = async () => {
+    //     const payload = {
+    //         workspaceId: selectedWorkspace._id,
+    //         emails: collaborators,
+    //         friendIds: selectedFriends,
+    //     };
 
 
-        try {
-            // console.log("Payload to send:", payload);
-              await fetch("/api/add-collaborators", {
-                method: "POST",
-                headers: {
-                  "Content-Type": "application/json",
-                },
-                body: JSON.stringify(payload),
-              });
-              onClose(); 
-        } catch (error) {
-            console.error("Error adding collaborators:", error);
-        }
-    };
+    //     try {
+    //         // console.log("Payload to send:", payload);
+    //           await fetch("/api/add-collaborators", {
+    //             method: "POST",
+    //             headers: {
+    //               "Content-Type": "application/json",
+    //             },
+    //             body: JSON.stringify(payload),
+    //           });
+    //           onClose(); 
+    //     } catch (error) {
+    //         console.error("Error adding collaborators:", error);
+    //     }
+    // };
+
+
+
+const handleFinalAdd = async () => {
+ 
+
+  const payload = {
+    workspaceId: selectedWorkspace._id,
+    emails: collaborators,
+    friendIds: selectedFriends,
+  };
+
+  try {
+    await addCollaborators(payload);
+    onClose(); // close modal if success
+  } catch (error) {
+    console.error("Error adding collaborators:", error);
+  }
+};
 
     return (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">

@@ -116,7 +116,7 @@ const deleteWord=async(req,res)=>{
   const updateWord=async(req,res)=>{
     try {
         const { wordId } = req.params;
-        console.log(req.body);
+        
         const { word, definition, example, level, status, favorite } = req.body;
         const wordToUpdate = await Word.findById(wordId);
         if (!wordToUpdate) {

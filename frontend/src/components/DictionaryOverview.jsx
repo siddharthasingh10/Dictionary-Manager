@@ -10,6 +10,7 @@ function DictionaryOverview() {
   const {authUser}=userAuthStore();
   console.log(authUser);
   const { isLoading, selectedWorkspace } = workspaceStore();
+  console.log("sel",selectedWorkspace);
   const [showModal, setShowModal] = useState(false);
 
   return isLoading ? (

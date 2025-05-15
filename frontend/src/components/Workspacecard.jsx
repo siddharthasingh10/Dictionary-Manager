@@ -1,28 +1,19 @@
 
+
 import { Pencil, Trash2 } from "lucide-react";
 import { workspaceStore } from "../store/workspaceStore";
 import { useState } from "react";
 import Editworkspacemodal from "./Editworkspacemodal";
 import { useNavigate } from "react-router-dom";
 
-
 function WorkspaceCard({ workspace }) {
   const [showEditModal, setShowEditModal] = useState(false);
-  // const { fetchWorkspaceById } = workspaceStore();
-  // console.log(workspace);
-
   const navigate = useNavigate();
 
-
-const clickHandler = () => {
-  // console.log(workspace._id);
-  workspaceStore.getState().fetchWorkspaceById(workspace._id);
-  
+  const clickHandler = () => {
+    workspaceStore.getState().fetchWorkspaceById(workspace._id);
     navigate(`/dictionary/${workspace._id}`);
-
-  
-
-}
+  };
 
   const initialData = {
     title: workspace.title,
@@ -35,9 +26,10 @@ const clickHandler = () => {
   };
 
   return (
-    <div  onClick={clickHandler}
-     className="relative border p-4 rounded-xl shadow-md hover:shadow-xl transition cursor-pointer bg-base-100 space-y-2">
-      
+    <div
+      onClick={clickHandler}
+      className="relative border p-4 rounded-xl shadow-md hover:shadow-xl transition cursor-pointer bg-base-100 space-y-2"
+    >
       {/* Title + Public/Private Badge + Buttons */}
       <div className="flex justify-between items-start">
         <div className="flex items-center gap-3">
@@ -54,15 +46,24 @@ const clickHandler = () => {
         </div>
 
         <div className="flex space-x-2">
+          {/* Edit Button */}
           <button
-            onClick={() => setShowEditModal(true)}
+            onClick={(e) => {
+              e.stopPropagation(); // stop card click
+              setShowEditModal(true);
+            }}
             className="btn btn-xs btn-outline btn-primary tooltip"
             data-tip="Edit"
           >
             <Pencil className="w-4 h-4" />
           </button>
+
+          {/* Delete Button */}
           <button
-            onClick={deleteHandler}
+            onClick={(e) => {
+              e.stopPropagation(); // stop card click
+              deleteHandler();
+            }}
             className="btn btn-xs btn-outline btn-error tooltip"
             data-tip="Delete"
           >
@@ -94,7 +95,7 @@ const clickHandler = () => {
         <Editworkspacemodal
           onClose={() => setShowEditModal(false)}
           initialData={initialData}
-          workspaceId={workspace._id} 
+          workspaceId={workspace._id}
         />
       )}
     </div>
@@ -102,3 +103,4 @@ const clickHandler = () => {
 }
 
 export default WorkspaceCard;
+

@@ -38,6 +38,9 @@
       if(label==="Social"){
         navigate("/social");
       }
+      if(label==="Collaboration"){
+        navigate("/collaboration");
+      }
     }
 
 

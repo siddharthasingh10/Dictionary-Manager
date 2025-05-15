@@ -16,6 +16,7 @@ import Workspace from "./components/Workspace";
 import Social from "./components/Social";
 import VocabularyTable from "./components/VocabularyTable";
 import DictionaryOverview from "./components/DictionaryOverview";
+import Collab from "./components/Collab";
 
 const App = () => {
   const { authUser, isCheckingAuth, } = userAuthStore();
@@ -57,6 +58,7 @@ const App = () => {
             <Route path="/workspace" element={<Workspace />} />
             <Route path="/social" element={<Social />} />
             <Route path="/dictionary/:id" element={<DictionaryOverview />} />
+            <Route path="/collaboration" element={<Collab/>} />
 
           </Route>
         )}

@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { workspaceStore } from "../store/workspaceStore";
 
-function Editworkspacemodal({ onClose, initialData, workspaceId}) {
+function Editworkspacemodal({ onClose, initialData, workspaceId }) {
   const [formData, setFormData] = useState({
     title: "",
     description: "",
@@ -13,7 +13,7 @@ function Editworkspacemodal({ onClose, initialData, workspaceId}) {
     if (initialData) {
       setFormData({
         title: initialData.title || "",
-        description: initialData.description || "",
+        description: initialData.description || false,
         isPublic: initialData.isPublic || false,
       });
     }
@@ -25,8 +25,14 @@ function Editworkspacemodal({ onClose, initialData, workspaceId}) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 backdrop-blur-sm">
-      <div className="bg-base-100 border border-white/10 p-8 rounded-xl w-full max-w-xl shadow-lg">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 backdrop-blur-sm"
+      onClick={onClose} // Clicking outside modal closes it
+    >
+      <div
+        className="bg-base-100 border border-white/10 p-8 rounded-xl w-full max-w-xl shadow-lg"
+        onClick={(e) => e.stopPropagation()} // This stops click from bubbling to card or backdrop
+      >
         <h2 className="text-2xl font-bold mb-4 text-primary">Edit Workspace</h2>
 
         <div className="form-control mb-4">
