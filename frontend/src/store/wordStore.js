@@ -97,6 +97,7 @@ export const wordStore = create(
 
       // Edit existing word
       editWord: async (wordId, data) => {
+        console.log("Editing word:", wordId, data);
         set({ isLoading: true });
         try {
           const res = await axios.put(`http://localhost:2121/word/edit/${wordId}`, data, {
