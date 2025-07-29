@@ -86,10 +86,12 @@ function DictionaryOverview() {
       )}
 
 
-      {/* Vocabulary Table */}
+       {selectedWorkspace.author._id===authUser._id  ?
       <div className="bg-base-100 shadow-md rounded-xl p-4">
         <WorkspaceAiSection workspaceId={selectedWorkspace?._id} workspace={selectedWorkspace} />
-      </div>
+      </div> : <div></div>}
+
+      {/* Vocabulary Table */}
       <div className="bg-base-100 shadow-md rounded-xl p-4">
         <VocabularyTable workspace={selectedWorkspace} />
       </div>

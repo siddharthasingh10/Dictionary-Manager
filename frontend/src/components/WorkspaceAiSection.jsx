@@ -6,9 +6,8 @@ import { workspaceStore } from "../store/workspaceStore";
 import { wordStore } from "../store/wordStore";
 import { toast } from "react-hot-toast";
 import AiWordSuggestions from "./AiWordSuggestions";
-import { userAuthStore } from "../store/userAuthStore";
 
-function WorkspaceAiSection({ workspaceId,workspace }) {
+function WorkspaceAiSection({ workspaceId }) {
 
   const {
     aiPrompt,
@@ -20,7 +19,7 @@ function WorkspaceAiSection({ workspaceId,workspace }) {
   } = useStore(workspaceStore);
 
   const { words, addWordFromAi } = useStore(wordStore);
-  const {authUser}=useStore(userAuthStore);
+  
 
   const handleAskAi = async () => {
     if (!aiPrompt.trim()) {
@@ -68,7 +67,7 @@ function WorkspaceAiSection({ workspaceId,workspace }) {
   };
 
   return (
-    (workspace.author._id===authUser._id  && 
+   
    
     <div className="space-y-4 my-6">
       {/* Prompt input + Ask AI */}
@@ -113,7 +112,7 @@ function WorkspaceAiSection({ workspaceId,workspace }) {
       )}
 
     
-    </div>)
+    </div>
 
   );
 }

@@ -21,6 +21,7 @@ function AiWordSuggestion({ workspaceId }) {
      
     } catch (err) {
       toast.error("Failed to add word");
+      console.error("Add word error:", err);
     }
   };
 
