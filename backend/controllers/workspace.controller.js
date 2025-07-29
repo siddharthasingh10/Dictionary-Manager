@@ -1,6 +1,7 @@
 
 const { validationResult } = require("express-validator");
 const User = require("../models/user.model");
+const mongoose = require("mongoose");
 const Workspace = require("../models/workspace.model");
 
 const createWorkspace = async (req, res) => {
@@ -96,7 +97,12 @@ const deleteWorkspace=async(req,res)=>{
 
 const getAllWorkspace=async(req,res)=>{
     try {
-        const workspace=await Workspace.find().sort({createdAt:-1}).populate({path:"author",select:"fullName email"});
+        
+        const workspace = await Workspace.find({ isPublic: true })
+  .sort({ createdAt: -1 })
+  .populate({ path: "author", select: "fullName email" })
+  .populate({ path: "words",select:"word "});
+
         if(!workspace){
             return res.status(404).json({message:"No workspaces found"});
         }
@@ -133,9 +139,10 @@ const editWorkspace=async(req,res)=>{
         if(description){
             workspace.description=description;
         }
-        if(isPublic){
-            workspace.isPublic=isPublic;
-        }
+      if (typeof isPublic === "boolean") {
+    workspace.isPublic = isPublic;
+}
+
         await workspace.save();
         res.status(200).json({message:"Workspace updated successfully",success:true,workspace});
         
@@ -194,125 +201,6 @@ const getAllWorkspacesByUserId=async(req,res)=>{
         });
     }
 }
-// const addCollaborators = async (req, res) => {
-//   try {
-//     const { workspaceId, friendIds = [], emails = [] } = req.body;
-
-//     if (!workspaceId) {
-//       return res.status(400).json({ error: "Workspace ID is required." });
-//     }
-
-//     // Find workspace
-//     const workspace = await Workspace.findById(workspaceId);
-//     if (!workspace) {
-//       return res.status(404).json({ error: "Workspace not found." });
-//     }
-
-//     // Find users by email
-//     const emailUsers = await User.find({ email: { $in: emails } }).select('_id');
-
-//     // Combine IDs
-//     const newCollaboratorIds = [
-//       ...friendIds,
-//       ...emailUsers.map(user => user._id.toString()),
-//     ];
-
-//     // Filter out existing collaborators
-//     const uniqueCollaborators = newCollaboratorIds.filter(
-//       (id) => !workspace.collaborators.includes(id)
-//     );
-
-//     // Update workspace
-//     workspace.collaborators.push(...uniqueCollaborators);
-//     await workspace.save();
-
-//     // Also update users' collaboration lists
-//     await User.updateMany(
-//       { _id: { $in: uniqueCollaborators } },
-//       { $addToSet: { collaborations: workspaceId } }
-//     );
-
-//     // Populate before sending response
-//     const updatedWorkspace = await Workspace.findById(workspaceId)
-//       .populate("author", "fullName email")
-//       .populate("collaborators", "fullName email");
-
-//     res.status(200).json({
-//       message: "Collaborators added successfully",
-//       updatedWorkspace,
-//     });
-//   } catch (error) {
-//     console.error("Add Collaborators Error:", error);
-//     res.status(500).json({ error: "Something went wrong while adding collaborators." });
-//   }
-// };
-
-// const addCollaborators = async (req, res) => {
-//   try {
-//     console.log("Request Body:", req.body);
-//     const { workspaceId, friendIds = [], emails = [] } = req.body;
-
-//     if (!workspaceId) {
-//       return res.status(400).json({ error: "Workspace ID is required." });
-//     }
-
-//     // 1. Find workspace
-//     const workspace = await Workspace.findById(workspaceId);
-//     if (!workspace) {
-//       return res.status(404).json({ error: "Workspace not found." });
-//     }
-
-//     // 2. Validate friendIds
-//     const validFriends = await User.find({ _id: { $in: friendIds } }).select('_id');
-//     if (validFriends.length !== friendIds.length) {
-//       return res.status(400).json({ error: "Some friend IDs are invalid or users not found." });
-//     }
-
-//     // 3. Validate emails
-//     const emailUsers = await User.find({ email: { $in: emails } }).select('_id');
-//     if (emailUsers.length !== emails.length) {
-//       return res.status(400).json({ error: "Some email addresses are not registered." });
-//     }
-
-//     // 4. Combine IDs
-//     const newCollaboratorIds = [
-//       ...validFriends.map(u => u._id.toString()),
-//       ...emailUsers.map(u => u._id.toString())
-//     ];
-
-//     // 5. Remove duplicates (already added collaborators)
-//     const uniqueCollaborators = newCollaboratorIds.filter(
-//       (id) => !workspace.collaborators.includes(id)
-//     );
-
-//     // 6. Update workspace
-//     workspace.collaborators.push(...uniqueCollaborators);
-//     await workspace.save();
-
-//     // 7. Update users' collaborations
-//     await User.updateMany(
-//       { _id: { $in: uniqueCollaborators } },
-//       { $addToSet: { collaborations: workspaceId } }
-//     );
-
-//     // 8. Return updated workspace
-//     const updatedWorkspace = await Workspace.findById(workspaceId)
-//       .populate("author", "fullName email")
-//       .populate("collaborators", "fullName email");
-
-//       console.log("Updated Workspace:", updatedWorkspace);
-
-//     res.status(200).json({
-//       message: "Collaborators added successfully",
-//       updatedWorkspace,
-//     });
-//   } catch (error) {
-//     console.error("Add Collaborators Error:", error);
-//     res.status(500).json({ error: "Something went wrong while adding collaborators." });
-//   }
-// };
-
-const mongoose = require("mongoose");
 
 const addCollaborators = async (req, res) => {
   try {
@@ -384,12 +272,141 @@ const addCollaborators = async (req, res) => {
     res.status(500).json({ error: "Something went wrong while adding collaborators." });
   }
 };
+const getCollaboratedWorkspaces = async (req, res) => {
+    try {
+        console.log("Request Body:", req.body);
+        const userId = req.id;
+        console.log("User ID:", userId);
+        if (!userId) {
+            return res.status(400).json({ message: "User ID is required" });
+        }
+        // Find all workspaces where the user is a collaborator
+        const workspaces = await Workspace.find({ collaborators: userId })
+            .populate("author", "fullName email")
+            .populate("collaborators", "fullName email");
+       
+        res.status(200).json({
+            message: "Collaborated workspaces fetched successfully",
+            success: true,
+            workspaces
+        });
+    } catch (error) {
+        console.error("Error fetching collaborated workspaces:", error);
+        res.status(500).json({ message: "Internal server error", error: error.message });
+    }
 
-module.exports={
+}
+
+
+const likeOrDislikeWorkspace = async (req, res) => {
+  try {
+    const userId = req.id;
+    const workspaceId = req.params.workspaceId;
+    const action = req.params.action; // 'like' or 'dislike'
+
+    const workspace = await Workspace.findById(workspaceId).populate('author', 'fullName');
+
+    if (!workspace) {
+      return res.status(404).json({ message: "Workspace not found" });
+    }
+
+    if (action === 'like') {
+      if (!workspace.likes.includes(userId)) {
+        workspace.likes.push(userId);
+      }
+    } else {
+      workspace.likes = workspace.likes.filter(id => id.toString() !== userId);
+    }
+
+    await workspace.save();
+
+    res.status(200).json({
+      message: `Workspace ${action}d successfully`,
+      workspace: {
+        ...workspace.toObject(),
+        likesCount: workspace.likes.length
+      }
+    });
+
+  } catch (err) {
+    console.error("Like/dislike error:", err);
+    res.status(500).json({ message: "Server error", error: err.message });
+  }
+};
+
+// Save/Unsave Controller
+const saveWorkspace = async (req, res) => {
+  try {
+    const userId = req.id;
+    const workspaceId = req.params.workspaceId;
+    
+    const user = await User.findById(userId);
+    const workspace = await Workspace.findById(workspaceId).populate('author', 'fullName');
+
+    if (!user || !workspace) {
+      return res.status(404).json({ message: "User or workspace not found" });
+    }
+
+    const isSaved = user.savedWorkspaces.includes(workspaceId);
+    
+    if (isSaved) {
+      user.savedWorkspaces.pull(workspaceId);
+    } else {
+      user.savedWorkspaces.push(workspaceId);
+    }
+
+    await user.save();
+
+    res.status(200).json({
+      message: isSaved ? "Removed from saved" : "Saved to collection",
+      updatedUser: user,
+      workspace: workspace
+    });
+
+  } catch (err) {
+    console.error("Save error:", err);
+    res.status(500).json({ message: "Server error", error: err.message });
+  }
+};
+const getAllSavedWorkspaces = async (req, res) => {
+  try {
+    const userId = req.id;
+
+    const user = await User.findById(userId).select("savedWorkspaces");
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    const savedWorkspaces = await Workspace.find({
+      _id: { $in: user.savedWorkspaces },
+    })
+      .populate("author", "fullName email")
+      .populate("collaborators", "fullName email");
+
+    res.status(200).json({
+      message: "Saved workspaces fetched successfully",
+      success: true,
+      savedWorkspaces,
+    });
+  } catch (error) {
+    console.error("Error fetching saved workspaces:", error);
+    res.status(500).json({
+      message: "Internal server error",
+      success: false,
+      error: error.message,
+    });
+  }
+};
+module.exports={   
     createWorkspace,
     deleteWorkspace,
     getAllWorkspace,
     editWorkspace,getWorkspaceById,
     getAllWorkspacesByUserId,
-    addCollaborators
+    addCollaborators,
+    getCollaboratedWorkspaces,
+    getAllSavedWorkspaces,
+    saveWorkspace,
+ likeOrDislikeWorkspace 
+   
 }

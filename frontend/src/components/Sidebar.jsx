@@ -4,7 +4,7 @@
   
   // Sidebar.jsx
   import React from 'react';
-  import { Users, FolderKanban, Share2, Bookmark, UserCircle, LogOut } from 'lucide-react';
+  import { Users, FolderKanban, Share2, Bookmark, UserCircle, LogOut, UserPlus } from 'lucide-react';
   import { useNavigate } from 'react-router-dom';
   import { userAuthStore } from '../store/userAuthStore';
 
@@ -12,14 +12,14 @@
     { label: 'Social', icon: Users },
     { label: 'Workspace', icon: FolderKanban },
     { label: 'Collaboration', icon: Share2 },
+    { label: 'Friend', icon: UserPlus },
     { label: 'Saved', icon: Bookmark },
     { label: 'Profile', icon: UserCircle},
     { label: 'Logout', icon: LogOut },
+    
   ];
   const logoutHandler = async () => {
 
-
-    
 
     userAuthStore.getState().logout();
 
@@ -27,6 +27,7 @@
 
   const Sidebar = () => {
     const navigate = useNavigate();
+    const { authUser } = userAuthStore();
 
     const sidebarHandler = (label) => {
       if(label==="Workspace"){
@@ -40,6 +41,13 @@
       }
       if(label==="Collaboration"){
         navigate("/collaboration");
+      }
+      if(label==="Saved"){
+        console.log("Saved");
+        navigate("/saved");
+      }
+      if(label==="Profile"){
+        navigate(`/profile/${authUser._id}`);
       }
     }
 

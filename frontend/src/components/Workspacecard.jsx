@@ -7,6 +7,7 @@ import Editworkspacemodal from "./Editworkspacemodal";
 import { useNavigate } from "react-router-dom";
 
 function WorkspaceCard({ workspace }) {
+  console.log(workspace);
   const [showEditModal, setShowEditModal] = useState(false);
   const navigate = useNavigate();
 

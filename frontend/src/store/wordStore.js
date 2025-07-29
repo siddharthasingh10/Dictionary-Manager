@@ -130,7 +130,29 @@ export const wordStore = create(
           set({ isLoading: false });
           throw error;
         }
-      }
+      },
+      addWordFromAi: async (wordObj, workspaceId) => {
+        const existing = get().words.find(
+          w => w.word.toLowerCase() === wordObj.word.toLowerCase()
+        );
+        if (existing) {
+          toast.error("Word already exists in this workspace");
+          return;
+        }
+        try {
+          const res = await axios.post(
+            "http://localhost:2121/word/create",
+            { ...wordObj,  workspaceId },
+            { withCredentials: true }
+          );
+          set(state => ({
+            words: [res.data.word, ...state.words]
+          }));
+          toast.success("Word added!");
+        } catch (error) {
+          toast.error(error?.response?.data?.message || "Failed to add word");
+        }
+      },
     }),
     {
       name: "wordStore",

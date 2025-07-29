@@ -20,12 +20,10 @@ const userAuth=async(req,res,next)=>{
                 success: false
             });
         }
-            // console.log("Decoded token:", decoded); // Log the decoded token for debugging
         req.id = decoded.id; 
         req.user = { _id: decoded.id };
-// console.log("User ID from token:", req.user._id); // Log the user ID for debugging
         next(); 
-        // console.log("User authenticated successfully"); // Log success message
+        
         
     } catch (error) {
         console.error("Auth Error:", error);

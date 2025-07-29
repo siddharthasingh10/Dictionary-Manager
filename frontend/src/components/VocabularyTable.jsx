@@ -3,8 +3,10 @@ import { FaStar, FaRegStar, FaSortAmountDown, FaFilter, FaTrash } from 'react-ic
 import WordCreateModal from './WordCreateModal';
 import { wordStore } from '../store/wordStore';
 import { toast } from "react-hot-toast";
+import { userAuthStore } from '../store/userAuthStore';
 
-const VocabularyTable = () => {
+const VocabularyTable = ({workspace}) => {
+  const {authUser}=userAuthStore();
   const {
     words,
     isLoading,
@@ -97,13 +99,16 @@ const VocabularyTable = () => {
   return (
     <div className="p-6 bg-base-200 min-h-screen text-sm">
       <div className="flex justify-between items-center mb-4">
-        <button
+      { workspace.author._id === authUser._id &&
+          <button
           onClick={() => setShowModal(true)}
           className='btn btn-primary btn-sm'
           disabled={isLoading}
         >
           {isLoading ? 'Loading...' : '+ Add New Word'}
         </button>
+      }
+        
 
         <div className="flex gap-2">
           <button className="btn btn-sm btn-outline btn-success" disabled={isLoading}>
@@ -126,7 +131,13 @@ const VocabularyTable = () => {
           <div>Actions</div>
         </div>
 
-        {words.map((word, index) => (
+        {  words.length === 0 && (
+          <div className="flex items-center justify-center h-32 text-gray-500">
+            <p className="text-lg">No words found.</p>
+          </div>
+        )}
+        {
+          words.map((word, index) => (
           <div key={index} className="grid grid-cols-[40px_180px_250px_100px_160px_1fr_80px] items-center border-b border-base-300 p-2">
             <div>{index + 1}</div>
             <div className="flex items-center gap-2">
@@ -234,32 +245,35 @@ const VocabularyTable = () => {
               )}
             </div>
             <div className="flex justify-end gap-1">
-              {editIndex === index ? (
-                <button
-                  onClick={() => handleSave(index)}
-                  className="btn btn-xs btn-success"
-                  disabled={isLoading}
-                >
-                  {isLoading ? '...' : '💾Save'}
-                </button>
-              ) : (
-                <>
-                  <button
-                    onClick={() => handleEdit(index)}
-                    className="btn btn-xs btn-ghost"
-                    disabled={isLoading}
-                  >
-                    ✏️
-                  </button>
-                  <button
-                    onClick={() => handleDelete(word._id)}
-                    className="btn btn-xs btn-ghost text-error"
-                    disabled={isLoading}
-                  >
-                    <FaTrash />
-                  </button>
-                </>
-              )}
+            {workspace.author._id === authUser._id ? (
+  editIndex === index ? (
+    <button
+      onClick={() => handleSave(index)}
+      className="btn btn-xs btn-success"
+      disabled={isLoading}
+    >
+      {isLoading ? '...' : '💾Save'}
+    </button>
+  ) : (
+    <>
+      <button
+        onClick={() => handleEdit(index)}
+        className="btn btn-xs btn-ghost"
+        disabled={isLoading}
+      >
+        ✏️
+      </button>
+      <button
+        onClick={() => handleDelete(word._id)}
+        className="btn btn-xs btn-ghost text-error"
+        disabled={isLoading}
+      >
+        <FaTrash />
+      </button>
+    </>
+  )
+) : null}
+
             </div>
           </div>
         ))}

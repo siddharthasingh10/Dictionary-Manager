@@ -10,6 +10,7 @@ const workspaceSchema = new mongoose.Schema({
     collaborators: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
     
     words: [{ type: mongoose.Schema.Types.ObjectId, ref: "Word" }], 
+    likes: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
   
   }, { timestamps: true });
   

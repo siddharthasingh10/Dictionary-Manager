@@ -47,7 +47,7 @@ delete userToSend.password;
     res.status(500).json({ message: "Internal server error in signing up" });
   }
 };
-
+   
 const login=async(req,res)=>{
     try {
         const {email,password}=req.body;
@@ -135,6 +135,67 @@ const getMe=async(req,res)=>{
     res.status(500).json({ message: "Internal server error in getting user" });
   }
 }
+const getFriends=async(req,res)=>{
+  try {
+    console.log("Fetching friends for user ID:", req.params.id);
+    const userId = req.params.id; 
+    const user = await User.findById(userId).select("-password").populate({path:"friends",select:"fullName email"}); // Exclude password field from the response
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    return res.status(200).json({ message: "User fetched successfully", friends:user.friends });
+    
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Internal server error in getting user" });
+  }
+}
+const addFriend=async(req,res)=>{
+   try {
+    const { email } = req.body;
+    const currentUserId = req.user._id;
 
-module.exports = { signup,login,logout,getUser,getMe };
+    // Find the friend by email
+    const friend = await User.findOne({ email });
+    if (!friend) {
+      return res.status(404).json({ message: 'User with this email not found' });
+    }
+
+    // Check if it's the same user
+    if (friend._id.equals(currentUserId)) {
+      return res.status(400).json({ message: 'You cannot add yourself as a friend' });
+    }
+
+    // Check if already friends
+    const currentUser = await User.findById(currentUserId);
+    if (currentUser.friends.includes(friend._id)) {
+      return res.status(400).json({ message: 'This user is already your friend' });
+    }
+
+    // Add friend to both users (two-way friendship)
+    await User.findByIdAndUpdate(currentUserId, {
+      $addToSet: { friends: friend._id }
+    });
+
+    await User.findByIdAndUpdate(friend._id, {
+      $addToSet: { friends: currentUserId }
+    });
+
+    // Get updated user data with populated friends
+    const updatedUser = await User.findById(currentUserId)
+      .populate('friends', 'fullName email profilePicture');
+
+    res.status(200).json({
+      message: 'Friend added successfully', 
+      
+      friends: updatedUser.friends
+    });
+
+  } catch (error) {
+    console.error('Error adding friend:', error);
+    res.status(500).json({ message: 'Failed to add friend', error: error.message });
+  }
+}
+
+module.exports = { signup,login,logout,getUser,getMe,getFriends,addFriend };
 

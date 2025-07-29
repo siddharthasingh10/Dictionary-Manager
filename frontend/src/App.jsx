@@ -17,6 +17,9 @@ import Social from "./components/Social";
 import VocabularyTable from "./components/VocabularyTable";
 import DictionaryOverview from "./components/DictionaryOverview";
 import Collab from "./components/Collab";
+import Savedworkspace from "./components/Savedworkspace";
+import ProfilePage from "./components/ProfilePage";
+import AddFriend from "./components/AddFriend";
 
 const App = () => {
   const { authUser, isCheckingAuth, } = userAuthStore();
@@ -59,7 +62,9 @@ const App = () => {
             <Route path="/social" element={<Social />} />
             <Route path="/dictionary/:id" element={<DictionaryOverview />} />
             <Route path="/collaboration" element={<Collab/>} />
-
+            <Route path="/saved" element={<Savedworkspace/>} />
+            <Route path="/profile/:userId" element={<ProfilePage />} />
+            <Route path="/friend" element={<AddFriend />} />
           </Route>
         )}
 
