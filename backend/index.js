@@ -8,10 +8,7 @@ dotenv.config();
 const app = express();
 
 app.use(cors({
-  origin: [
-    "http://localhost:5173",
-    "https://dictionary-manager-blond.vercel.app",
-    "https://dictionary-manager-gwytw72t4.vercel.app"
+  origin: ["*"
   ],
   credentials: true
 }));
