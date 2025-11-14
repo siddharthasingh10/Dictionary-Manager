@@ -5,7 +5,7 @@ import { UserIcon, UsersIcon, GlobeIcon, BookOpenIcon } from 'lucide-react';
 import { workspaceStore } from '../store/workspaceStore';
 import CollabModal from './CollabModal';
 import { userAuthStore } from '../store/userAuthStore';
-import WorkspaceAiSection from './WorkspaceAiSection';
+// import WorkspaceAiSection from './WorkspaceAiSection';
 
 function DictionaryOverview() {
 
@@ -86,10 +86,10 @@ function DictionaryOverview() {
       )}
 
 
-       {selectedWorkspace.author._id===authUser._id  ?
+       {/* {selectedWorkspace.author._id===authUser._id  ?
       <div className="bg-base-100 shadow-md rounded-xl p-4">
         <WorkspaceAiSection workspaceId={selectedWorkspace?._id} workspace={selectedWorkspace} />
-      </div> : <div></div>}
+      </div> : <div></div>} */}
 
       {/* Vocabulary Table */}
       <div className="bg-base-100 shadow-md rounded-xl p-4">

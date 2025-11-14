@@ -47,17 +47,21 @@
         navigate("/saved");
       }
       if(label==="Profile"){
+        
         navigate(`/profile/${authUser._id}`);
       }
+      if(label==="Friend"){
+        navigate("/friend")
     }
+  }
 
 
     return (
       <>
         {/* Sidebar for Desktop */}
         <div className="hidden md:flex fixed top-0 left-0 h-screen w-64 bg-base-200 border-r shadow-md flex-col p-4 z-40">
-          <h1 className="text-xl font-bold mb-6 px-2">MyApp</h1>
-          {sidebarItems.map(({ label, icon: Icon }) => (
+          <h1 className="text-xl font-bold mb-6 px-2">Dictionary</h1>
+          {sidebarItems.map(({ label, icon:Icon }) => (
             <button key={label} onClick={()=>sidebarHandler(label)}
             className="btn btn-ghost justify-start gap-4 mb-2 text-base w-full">
               <Icon className="w-5 h-5"    />

@@ -24,8 +24,6 @@ import AddFriend from "./components/AddFriend";
 const App = () => {
   const { authUser, isCheckingAuth, } = userAuthStore();
   
-
-
   useEffect(() => {
     userAuthStore.getState().initialize();
   }, []);

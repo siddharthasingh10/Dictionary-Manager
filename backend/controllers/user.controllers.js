@@ -153,6 +153,7 @@ const getFriends=async(req,res)=>{
 const addFriend=async(req,res)=>{
    try {
     const { email } = req.body;
+    console.log("herere")
     const currentUserId = req.user._id;
 
     // Find the friend by email

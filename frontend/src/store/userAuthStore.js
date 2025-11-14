@@ -2,7 +2,9 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { toast } from "react-hot-toast";
 import axios from "axios";
-import { workspaceStore } from "./workspaceStore"; 
+import { workspaceStore } from "./workspaceStore";
+
+const API = import.meta.env.VITE_API_URL;
 
 export const userAuthStore = create(
   persist(
@@ -14,19 +16,14 @@ export const userAuthStore = create(
 
       signup: async (data) => {
         set({ isSigningUp: true });
-
         try {
-          const res = await axios.post(
-            "http://localhost:2121/user/signup",
-            data,
-            { withCredentials: true }
-          );
-
+          const res = await axios.post(`${API}/user/signup`, data, {
+            withCredentials: true,
+          });
           set({ authUser: res.data.user });
-          toast.success("Signup successful!");
+          toast.success("Signup Successful!");
         } catch (error) {
           toast.error(error?.response?.data?.message || "Signup failed");
-          console.error("Signup error:", error);
         } finally {
           set({ isSigningUp: false });
         }
@@ -34,26 +31,16 @@ export const userAuthStore = create(
 
       login: async (data) => {
         set({ isLoggingIn: true });
-
         try {
-          const res = await axios.post(
-            "http://localhost:2121/user/login",
-            data,
-            {
-              withCredentials: true,
-            }
-          );
-
-          const user = res.data.user;
-          console.log(res.data.user);
-          set({ authUser: user });
-
+          const res = await axios.post(`${API}/user/login`, data, {
+            withCredentials: true,
+          });
+          set({ authUser: res.data.user });
           toast.success("Login successful!");
         } catch (error) {
-          const audio=new Audio("../audio.mp3");
-          audio.play();
+          // const audio = new Audio("../audio.mp3");
+          // audio.play();
           toast.error(error?.response?.data?.message || "Login failed");
-          console.error("Login error:", error);
         } finally {
           set({ isLoggingIn: false });
         }
@@ -62,91 +49,69 @@ export const userAuthStore = create(
       logout: async () => {
         try {
           await axios.post(
-            "http://localhost:2121/user/logout",
+            `${API}/user/logout`,
             {},
-            {
-              withCredentials: true,
-            }
+            { withCredentials: true }
           );
-
           set({ authUser: null });
-
-          toast.success("Logged out successfully!");
+          toast.success("Logged out");
         } catch (error) {
-          toast.error(error?.response?.data?.message || "Logout failed");
-          console.error("Logout error:", error);
+          toast.error("Logout failed");
         }
       },
+
       addFriend: async (email) => {
         try {
           const res = await axios.post(
-            "http://localhost:2121/user/add-friend",
+            `${API}/user/add-friend`,
             { email },
             { withCredentials: true }
           );
 
-          // Update the authUser with new friends list
           set((state) => ({
-            authUser: {
-              ...state.authUser,
-              friends: res.data.friends,
-            },
+            authUser: { ...state.authUser, friends: res.data.friends },
           }));
 
           toast.success(res.data.message);
-          return res.data.friends;
         } catch (error) {
-          toast.error(error?.response?.data?.message || "Failed to add friend");
-          throw error;
+          toast.error("Failed to add friend");
         }
       },
 
- 
-     
       checkAuth: async () => {
-        set({ isCheckingAuth: true }); 
+        set({ isCheckingAuth: true });
         try {
-          const res = await axios.get("http://localhost:2121/user/me", {
+          const res = await axios.get(`${API}/user/me`, {
             withCredentials: true,
           });
           set({ authUser: res.data, isCheckingAuth: false });
-        } catch (error) {
-          console.error("Auth check failed:", error.message);
+        } catch {
           set({ authUser: null, isCheckingAuth: false });
         }
       },
+
       initialize: async () => {
         set({ isCheckingAuth: true });
         try {
-          const res = await axios.get("http://localhost:2121/user/me", {
+          const res = await axios.get(`${API}/user/me`, {
             withCredentials: true,
           });
 
           set({ authUser: res.data.user });
-          const { authUser } = get();
 
-          // Fetch workspaces after auth is confirmed
-          if (res.data) {
+          const userId = res.data.user?._id;
+          if (userId) {
             await workspaceStore.getState().fetchAllWorkspaces();
-            await workspaceStore
-              .getState()
-              .fetchAllSavedWorkspaces(authUser._id);
-            console.log("Fetched all workspaces after auth check");
-            await workspaceStore
-              .getState()
-              .fetchUsersWorkspaces(res.data.user._id);
+            await workspaceStore.getState().fetchAllSavedWorkspaces(userId);
+            await workspaceStore.getState().fetchUsersWorkspaces(userId);
           }
-        } catch (error) {
-          console.error("Auth check failed:", error.message);
+        } catch {
           set({ authUser: null });
         } finally {
           set({ isCheckingAuth: false });
         }
       },
     }),
-    {
-      name: "userAuthStore",
-      getStorage: () => localStorage,
-    }
+    { name: "userAuthStore", getStorage: () => localStorage }
   )
 );

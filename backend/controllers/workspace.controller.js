@@ -298,13 +298,51 @@ const getCollaboratedWorkspaces = async (req, res) => {
 }
 
 
+// const likeOrDislikeWorkspace = async (req, res) => {
+//   try {
+//     const userId = req.id;
+//     const workspaceId = req.params.workspaceId;
+//     const action = req.params.action; // 'like' or 'dislike'
+
+//     const workspace = await Workspace.findById(workspaceId).populate('author', 'fullName');
+
+//     if (!workspace) {
+//       return res.status(404).json({ message: "Workspace not found" });
+//     }
+
+//     if (action === 'like') {
+//       if (!workspace.likes.includes(userId)) {
+//         workspace.likes.push(userId);
+//       }
+//     } else {
+//       workspace.likes = workspace.likes.filter(id => id.toString() !== userId);
+//     }
+
+//     await workspace.save();
+
+//     res.status(200).json({
+//       message: `Workspace ${action}d successfully`,
+//       workspace: {
+//         ...workspace.toObject(),
+//         likesCount: workspace.likes.length
+//       }
+//     });
+
+//   } catch (err) {
+//     console.error("Like/dislike error:", err);
+//     res.status(500).json({ message: "Server error", error: err.message });
+//   }
+// };
 const likeOrDislikeWorkspace = async (req, res) => {
   try {
     const userId = req.id;
     const workspaceId = req.params.workspaceId;
     const action = req.params.action; // 'like' or 'dislike'
 
-    const workspace = await Workspace.findById(workspaceId).populate('author', 'fullName');
+    // ✅ Populate both author and words
+    const workspace = await Workspace.findById(workspaceId)
+      .populate('author', 'fullName')
+      .populate('words', 'word definition example level status favorite'); // <-- ADD THIS
 
     if (!workspace) {
       return res.status(404).json({ message: "Workspace not found" });
@@ -320,11 +358,16 @@ const likeOrDislikeWorkspace = async (req, res) => {
 
     await workspace.save();
 
+    // ✅ Re-fetch to ensure populated data is updated
+    const updatedWorkspace = await Workspace.findById(workspaceId)
+      .populate('author', 'fullName')
+      .populate('words', 'word definition example level status favorite');
+
     res.status(200).json({
       message: `Workspace ${action}d successfully`,
       workspace: {
-        ...workspace.toObject(),
-        likesCount: workspace.likes.length
+        ...updatedWorkspace.toObject(),
+        likesCount: updatedWorkspace.likes.length
       }
     });
 
@@ -333,6 +376,7 @@ const likeOrDislikeWorkspace = async (req, res) => {
     res.status(500).json({ message: "Server error", error: err.message });
   }
 };
+
 
 // Save/Unsave Controller
 const saveWorkspace = async (req, res) => {

@@ -1,5 +1,5 @@
 import { Heart, Bookmark, Users } from "lucide-react";
-import { useEffect } from "react";
+
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-hot-toast";
 import { workspaceStore } from "../store/workspaceStore";

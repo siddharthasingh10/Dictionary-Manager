@@ -3,7 +3,7 @@ import { persist } from "zustand/middleware";
 import { toast } from "react-hot-toast";
 import axios from "axios";
 
-
+const API = import.meta.env.VITE_API_URL;
 
 export const wordStore = create(
   persist(
@@ -12,39 +12,38 @@ export const wordStore = create(
       isLoading: false,
       error: null,
 
-      // Fetch words for a workspace
       setWords: async (workspaceId) => {
         if (!workspaceId) {
-          set({ words: [] }); // Clear words if no workspace
+          set({ words: [] });
           return;
         }
-        
+
         set({ isLoading: true, error: null });
         try {
-          const res = await axios.get(`http://localhost:2121/word/get/${workspaceId}`, {
+          const res = await axios.get(`${API}/word/get/${workspaceId}`, {
             withCredentials: true,
           });
           set({ words: res.data.words || [], isLoading: false });
         } catch (error) {
-          set({ 
+          set({
             error: error?.response?.data?.message || "Failed to fetch words",
-            isLoading: false 
+            isLoading: false,
           });
-          console.error("Fetch words error:", error);
-          throw error; // Re-throw for component handling
+          throw error;
         }
       },
+
       updateWord: async (wordId, data) => {
         set({ isLoading: true });
         try {
-          const res = await axios.put(`http://localhost:2121/word/edit/${wordId}`, data, {
+          const res = await axios.put(`${API}/word/edit/${wordId}`, data, {
             withCredentials: true,
           });
-          set(state => ({
-            words: state.words.map(w => 
+          set((state) => ({
+            words: state.words.map((w) =>
               w._id === wordId ? { ...w, ...res.data.word } : w
             ),
-            isLoading: false
+            isLoading: false,
           }));
           return res.data.word;
         } catch (error) {
@@ -53,22 +52,20 @@ export const wordStore = create(
         }
       },
 
-      // Simple favorite toggle
       toggleFavorite: async (wordId, favoriteStatus) => {
         set({ isLoading: true });
         try {
-          console.log("Toggling favorite for word:", wordId, favoriteStatus);
-          const res = await axios.patch(`http://localhost:2121/word/favorite/${wordId}`, {
-            favorite: favoriteStatus
-          }, {
-            withCredentials: true,
-          });
+          const res = await axios.patch(
+            `${API}/word/favorite/${wordId}`,
+            { favorite: favoriteStatus },
+            { withCredentials: true }
+          );
 
-          set(state => ({
-            words: state.words.map(w => 
-              w._id === wordId ? { ...w, favorite:! favoriteStatus } : w
+          set((state) => ({
+            words: state.words.map((w) =>
+              w._id === wordId ? { ...w, favorite: !favoriteStatus } : w
             ),
-            isLoading: false
+            isLoading: false,
           }));
           return res.data.word;
         } catch (error) {
@@ -76,38 +73,16 @@ export const wordStore = create(
           throw error;
         }
       },
-    
-      // Create new word
+
       createWord: async (data) => {
         set({ isLoading: true });
         try {
-          const res = await axios.post("http://localhost:2121/word/create", data, {
-            withCredentials: true,
-          });
-          set((state) => ({ 
-            words: [res.data.word, ...state.words],
-            isLoading: false 
-          }));
-          return res.data.word; // Return for immediate use
-        } catch (error) {
-          set({ isLoading: false });
-          throw error;
-        }
-      },
-
-      // Edit existing word
-      editWord: async (wordId, data) => {
-        console.log("Editing word:", wordId, data);
-        set({ isLoading: true });
-        try {
-          const res = await axios.put(`http://localhost:2121/word/edit/${wordId}`, data, {
+          const res = await axios.post(`${API}/word/create`, data, {
             withCredentials: true,
           });
           set((state) => ({
-            words: state.words.map(w => 
-              w._id === wordId ? res.data.word : w
-            ),
-            isLoading: false
+            words: [res.data.word, ...state.words],
+            isLoading: false,
           }));
           return res.data.word;
         } catch (error) {
@@ -116,38 +91,59 @@ export const wordStore = create(
         }
       },
 
-      //Delete a word
-      deleteWord: async (wordId) => {
+      editWord: async (wordId, data) => {
         set({ isLoading: true });
         try {
-          await axios.delete(`http://localhost:2121/word/delete/${wordId}`, {
+          const res = await axios.put(`${API}/word/edit/${wordId}`, data, {
             withCredentials: true,
           });
           set((state) => ({
-            words: state.words.filter(w => w._id !== wordId),
-            isLoading: false
+            words: state.words.map((w) =>
+              w._id === wordId ? res.data.word : w
+            ),
+            isLoading: false,
+          }));
+          return res.data.word;
+        } catch (error) {
+          set({ isLoading: false });
+          throw error;
+        }
+      },
+
+      deleteWord: async (wordId) => {
+        set({ isLoading: true });
+        try {
+          await axios.delete(`${API}/word/delete/${wordId}`, {
+            withCredentials: true,
+          });
+          set((state) => ({
+            words: state.words.filter((w) => w._id !== wordId),
+            isLoading: false,
           }));
         } catch (error) {
           set({ isLoading: false });
           throw error;
         }
       },
+
       addWordFromAi: async (wordObj, workspaceId) => {
         const existing = get().words.find(
-          w => w.word.toLowerCase() === wordObj.word.toLowerCase()
+          (w) => w.word.toLowerCase() === wordObj.word.toLowerCase()
         );
         if (existing) {
-          toast.error("Word already exists in this workspace");
+          toast.error("Word already exists");
           return;
         }
+
         try {
           const res = await axios.post(
-            "http://localhost:2121/word/create",
-            { ...wordObj,  workspaceId },
+            `${API}/word/create`,
+            { ...wordObj, workspaceId },
             { withCredentials: true }
           );
-          set(state => ({
-            words: [res.data.word, ...state.words]
+
+          set((state) => ({
+            words: [res.data.word, ...state.words],
           }));
           toast.success("Word added!");
         } catch (error) {
@@ -158,14 +154,9 @@ export const wordStore = create(
     {
       name: "wordStore",
       getStorage: () => localStorage,
-      // // Only persist what's necessary
-      // partialize: (state) => ({ 
-      //   /* optionally persist some state */
-      // }),
     }
   )
 );
-
 
 
 

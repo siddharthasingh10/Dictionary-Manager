@@ -10,12 +10,12 @@ const workspaceRoutes = require('./routes/workspace.routes');
 const wordRoutes = require('./routes/word.routes');
 const connectDB = require('./utils/db');
 const aiRoutes = require("./routes/ai.routes");
-// const cohereImport = require('cohere-ai');
+// const cohere= require('cohere-ai');
 
 const PORT = process.env.PORT || 3000;
 // app.use(cors());
 app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.urlencoded({ extended: true }));  
 app.use(cookieParser());
 
 app.use(cors({
@@ -23,7 +23,7 @@ app.use(cors({
   credentials: true // allow cookies to be sent
 }));
 
-connectDB();
+connectDB();            
 
 // const cohere = cohereImport.default; // ✅ FIX
 // cohere.init(process.env.COHERE_API_KEY);

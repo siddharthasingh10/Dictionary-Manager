@@ -11,7 +11,7 @@ const userAuth=async(req,res,next)=>{
                 success: false
             });
         }
-
+      
         const decoded = jwt.verify(token, process.env.JWT_SECRET); 
 
         if (!decoded) {
