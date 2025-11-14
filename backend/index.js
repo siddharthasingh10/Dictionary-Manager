@@ -19,8 +19,8 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
 
 app.use(cors({
-  origin: ["http://localhost:5173", // your frontend URL~
-  "https://dictionary-manager.onrender.com"],
+  origin: ["http://localhost:5173", 
+  "https://dictionary-manager-blond.vercel.app"],
   credentials: true // allow cookies to be sent
 }));
 
