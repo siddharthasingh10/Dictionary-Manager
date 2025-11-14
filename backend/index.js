@@ -19,7 +19,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
 
 app.use(cors({
-  origin: ["http://localhost:5173", // your frontend URL
+  origin: ["http://localhost:5173", // your frontend URL~
   "https://dictionary-manager.onrender.com"],
   credentials: true // allow cookies to be sent
 }));
@@ -30,7 +30,7 @@ connectDB();
 // cohere.init(process.env.COHERE_API_KEY);
 
 app.use("/user", userRoutes);
-app.use("/workspace", workspaceRoutes);
+app.use("/workspace", workspaceRoutes);~
 app.use("/word", wordRoutes);
 app.use("/ai", aiRoutes);
 
