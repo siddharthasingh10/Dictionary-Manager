@@ -15,22 +15,40 @@ const {
   getAllSavedWorkspaces
 } = require("../controllers/workspace.controller");
 
-
 router.post("/create", [
-    body("title").notEmpty().withMessage("Title is required"),
+    body("title").notEmpty(),
     body("description").optional(),
-], userAuth,createWorkspace);
+], userAuth, createWorkspace);
+
+router.post("/add-collaborators", userAuth, addCollaborators);
+router.get("/collaborated", userAuth, getCollaboratedWorkspaces);
+router.get("/all", userAuth, getAllWorkspace);
+router.get("/all/:userId", userAuth, getAllWorkspacesByUserId);
+
+router.delete("/delete/:workspaceId([a-fA-F0-9]{24})", userAuth, deleteWorkspace);
+
+router.get("/:workspaceId([a-fA-F0-9]{24})", userAuth, getWorkspaceById);
+router.put("/edit/:workspaceId([a-fA-F0-9]{24})", userAuth, editWorkspace);
+
+router.post('/:workspaceId([a-fA-F0-9]{24})/:action(like|dislike)', userAuth, likeOrDislikeWorkspace);
+
+router.get('/:userId([a-fA-F0-9]{24})/allsaved', userAuth, getAllSavedWorkspaces);
+router.post('/:workspaceId([a-fA-F0-9]{24})/save', userAuth, saveWorkspace);
 
 
-router.post("/add-collaborators",userAuth,addCollaborators);
-router.get("/collaborated",userAuth,getCollaboratedWorkspaces);  
-router.get("/all",userAuth,getAllWorkspace);
-router.get("/all/:userId",userAuth,getAllWorkspacesByUserId);
-router.delete("/delete/:workspaceId", userAuth, deleteWorkspace);
-router.get("/:workspaceId", userAuth, getWorkspaceById);
-router.put("/edit/:workspaceId", [], userAuth, editWorkspace);
-router.post('/:workspaceId/:action', userAuth, likeOrDislikeWorkspace);
-router.get('/:userId/allsaved',userAuth,getAllSavedWorkspaces);
-router.post('/:workspaceId/save', userAuth, saveWorkspace);
+// router.post("/create", [
+//     body("title").notEmpty().withMessage("Title is required"),
+//     body("description").optional(),
+// ], userAuth,createWorkspace);
+// router.post("/add-collaborators",userAuth,addCollaborators);
+// router.get("/collaborated",userAuth,getCollaboratedWorkspaces);  
+// router.get("/all",userAuth,getAllWorkspace);
+// router.get("/all/:userId",userAuth,getAllWorkspacesByUserId);
+// router.delete("/delete/:workspaceId", userAuth, deleteWorkspace);
+// router.get("/:workspaceId", userAuth, getWorkspaceById);
+// router.put("/edit/:workspaceId", [], userAuth, editWorkspace);
+// router.post('/:workspaceId/:action', userAuth, likeOrDislikeWorkspace);
+// router.get('/:userId/allsaved',userAuth,getAllSavedWorkspaces);
+// router.post('/:workspaceId/save', userAuth, saveWorkspace);
 
 module.exports = router;
