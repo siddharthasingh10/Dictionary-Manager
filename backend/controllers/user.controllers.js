@@ -34,12 +34,13 @@ const signup = async (req, res) => {
 delete userToSend.password;
 
     const token =jwt.sign({id:user._id},process.env.JWT_SECRET,{expiresIn:"1d"});
-    res.cookie("token", token, {
-        httpOnly: true,
-        secure: false,
-        sameSite: "Strict",
-        maxAge: 1 * 24 * 60 * 60 * 1000 
-      });
+  res.cookie("token", token, {
+  httpOnly: true,
+  secure: true,
+  sameSite: "none",
+  maxAge: 24 * 60 * 60 * 1000
+});
+
     return res.status(201).json({ message: "User created successfully", success: true,user:userToSend });
 
   } catch (error) {
@@ -69,10 +70,10 @@ const login=async(req,res)=>{
         const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: "1d" });
         user.password = undefined;
        return res.cookie("token", token, {
-            httpOnly: true,
-            secure:false,
-            sameSite: "Strict",
-            maxAge: 7* 24 * 60 * 60 * 1000 
+           httpOnly: true,
+  secure: true,
+  sameSite: "none",
+  maxAge: 7 * 24 * 60 * 60 * 1000
           }).json({ message: "Login successful", success: true, user });
           
     } catch (error) {
@@ -92,7 +93,8 @@ const logout=async(req,res)=>{
 
     res.clearCookie("token", {
         httpOnly: true,
-        sameSite: "strict",
+        secure: true,
+        sameSite: "none",
     });
 
     return res.status(200).json({
