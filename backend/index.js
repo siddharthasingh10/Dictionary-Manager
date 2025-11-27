@@ -7,22 +7,23 @@ dotenv.config();
 
 const app = express();
 
+const allowedOrigins = [
+  "https://dictionary-manager-blond.vercel.app",
+  "http://localhost:5173"
+];
+
 app.use(cors({
-  origin: [
-    "https://dictionary-manager-blond.vercel.app",
-    "http://localhost:5173"
-  ],
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
   credentials: true
 }));
 
-app.use((req, res, next) => {
-  res.header("Access-Control-Allow-Origin", "https://dictionary-manager-blond.vercel.app");
-  res.header("Access-Control-Allow-Origin", "http://localhost:5173");
-  res.header("Access-Control-Allow-Credentials", "true");
-  res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
-  res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
-  next();
-});
+app.options("*", cors()); // Preflight
 
 
 app.use(express.json());
