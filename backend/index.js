@@ -14,13 +14,13 @@ dotenv.config();
 
 const app = express();
 
+// ✅ CORRECT
 app.use(cors({
-
   origin: [
     "https://dictionary-manager-blond.vercel.app"
   ],
   credentials: true
-}));
+})); 
 
 app.use((req, res, next) => {
   res.header("Access-Control-Allow-Origin", "https://dictionary-manager-blond.vercel.app");
