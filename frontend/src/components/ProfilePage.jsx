@@ -20,7 +20,7 @@ const ProfilePage = () => {
 const [userRes, friendsRes, workspacesRes] = await Promise.all([
   axios.get(`${API}/user/get/${userId}`, { withCredentials: true }),
   axios.get(`${API}/user/get-friends/${userId}`, { withCredentials: true }),
-  axios.get(`${API}/workspace/all/${userId}`, { withCredentials: true })
+  axios.get(`${API}/workspace/saved/${userId}`, { withCredentials: true })
 ]);
 
 
