@@ -14,12 +14,16 @@ export const userAuthStore = create(
       isLoggingIn: false,
       isCheckingAuth: false,
 
+      // ==========================
+      // SIGNUP
+      // ==========================
       signup: async (data) => {
         set({ isSigningUp: true });
         try {
           const res = await axios.post(`${API}/user/signup`, data, {
             withCredentials: true,
           });
+
           set({ authUser: res.data.user });
           toast.success("Signup Successful!");
         } catch (error) {
@@ -29,23 +33,28 @@ export const userAuthStore = create(
         }
       },
 
+      // ==========================
+      // LOGIN
+      // ==========================
       login: async (data) => {
         set({ isLoggingIn: true });
         try {
           const res = await axios.post(`${API}/user/login`, data, {
             withCredentials: true,
           });
+
           set({ authUser: res.data.user });
           toast.success("Login successful!");
         } catch (error) {
-          // const audio = new Audio("../audio.mp3");
-          // audio.play();
           toast.error(error?.response?.data?.message || "Login failed");
         } finally {
           set({ isLoggingIn: false });
         }
       },
 
+      // ==========================
+      // LOGOUT
+      // ==========================
       logout: async () => {
         try {
           await axios.post(
@@ -53,6 +62,7 @@ export const userAuthStore = create(
             {},
             { withCredentials: true }
           );
+
           set({ authUser: null });
           toast.success("Logged out");
         } catch (error) {
@@ -60,6 +70,9 @@ export const userAuthStore = create(
         }
       },
 
+      // ==========================
+      // ADD FRIEND
+      // ==========================
       addFriend: async (email) => {
         try {
           const res = await axios.post(
@@ -78,18 +91,26 @@ export const userAuthStore = create(
         }
       },
 
+      // ==========================
+      // CHECK AUTH (on page refresh)
+      // ==========================
       checkAuth: async () => {
         set({ isCheckingAuth: true });
         try {
           const res = await axios.get(`${API}/user/me`, {
             withCredentials: true,
           });
-          set({ authUser: res.data, isCheckingAuth: false });
+
+          // IMPORTANT FIX
+          set({ authUser: res.data.user, isCheckingAuth: false });
         } catch {
           set({ authUser: null, isCheckingAuth: false });
         }
       },
 
+      // ==========================
+      // INITIALIZE (first load)
+      // ==========================
       initialize: async () => {
         set({ isCheckingAuth: true });
         try {
@@ -97,13 +118,14 @@ export const userAuthStore = create(
             withCredentials: true,
           });
 
-          set({ authUser: res.data.user });
+          const user = res.data.user;
+          set({ authUser: user });
 
-          const userId = res.data.user?._id;
-          if (userId) {
+          // Fetch user-specific data
+          if (user?._id) {
             await workspaceStore.getState().fetchAllWorkspaces();
-            await workspaceStore.getState().fetchAllSavedWorkspaces(userId);
-            await workspaceStore.getState().fetchUsersWorkspaces(userId);
+            await workspaceStore.getState().fetchAllSavedWorkspaces(user._id);
+            await workspaceStore.getState().fetchUsersWorkspaces(user._id);
           }
         } catch {
           set({ authUser: null });
