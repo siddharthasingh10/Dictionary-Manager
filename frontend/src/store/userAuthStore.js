@@ -14,9 +14,7 @@ export const userAuthStore = create(
       isLoggingIn: false,
       isCheckingAuth: false,
 
-      // ==========================
-      // SIGNUP
-      // ==========================
+      
       signup: async (data) => {
         set({ isSigningUp: true });
         try {
@@ -33,9 +31,6 @@ export const userAuthStore = create(
         }
       },
 
-      // ==========================
-      // LOGIN
-      // ==========================
       login: async (data) => {
         set({ isLoggingIn: true });
         try {
@@ -52,9 +47,7 @@ export const userAuthStore = create(
         }
       },
 
-      // ==========================
-      // LOGOUT
-      // ==========================
+   
       logout: async () => {
         try {
           await axios.post(
@@ -70,9 +63,7 @@ export const userAuthStore = create(
         }
       },
 
-      // ==========================
-      // ADD FRIEND
-      // ==========================
+   
       addFriend: async (email) => {
         try {
           const res = await axios.post(
@@ -91,9 +82,7 @@ export const userAuthStore = create(
         }
       },
 
-      // ==========================
-      // CHECK AUTH (on page refresh)
-      // ==========================
+ 
       checkAuth: async () => {
         set({ isCheckingAuth: true });
         try {
@@ -108,9 +97,7 @@ export const userAuthStore = create(
         }
       },
 
-      // ==========================
-      // INITIALIZE (first load)
-      // ==========================
+   
       initialize: async () => {
         set({ isCheckingAuth: true });
         try {

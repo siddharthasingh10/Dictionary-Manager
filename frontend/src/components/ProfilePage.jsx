@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
 import axios from 'axios'
 import { userAuthStore } from '../store/userAuthStore'
+const API = import.meta.env.VITE_API_URL;
 
 const ProfilePage = () => {
   const navigate = useNavigate()
@@ -16,12 +17,12 @@ const ProfilePage = () => {
     const fetchUserData = async () => {
       try {
         setIsLoading(true)
+const [userRes, friendsRes, workspacesRes] = await Promise.all([
+  axios.get(`${API}/user/get/${userId}`, { withCredentials: true }),
+  axios.get(`${API}/user/get-friends/${userId}`, { withCredentials: true }),
+  axios.get(`${API}/workspace/all/${userId}`, { withCredentials: true })
+]);
 
-        const [userRes, friendsRes, workspacesRes] = await Promise.all([
-          axios.get(`http://localhost:2121/user/get/${userId}`, { withCredentials: true }),
-          axios.get(`http://localhost:2121/user/get-friends/${userId}`, { withCredentials: true }),
-          axios.get(`http://localhost:2121/workspace/all/${userId}`, { withCredentials: true })
-        ])
 
         setUser(userRes.data.user || null)
         setFriends(Array.isArray(friendsRes.data.friends) ? friendsRes.data.friends : [])
