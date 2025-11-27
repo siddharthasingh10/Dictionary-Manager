@@ -4,6 +4,12 @@ const bodyParser = require("body-parser");
 const dotenv = require("dotenv");
 const cookieParser = require("cookie-parser");
 
+const userRoutes = require("./routes/user.routes");
+const workspaceRoutes = require("./routes/workspace.routes");
+const wordRoutes = require("./routes/word.routes");
+const aiRoutes = require("./routes/ai.routes");
+const connectDB = require("./utils/db");
+
 dotenv.config();
 
 const app = express();
@@ -32,11 +38,6 @@ app.use(express.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
 
-const userRoutes = require("./routes/user.rotes");
-const workspaceRoutes = require("./routes/workspace.routes");
-const wordRoutes = require("./routes/word.routes");
-const aiRoutes = require("./routes/ai.routes");
-const connectDB = require("./utils/db");
 
 connectDB();
 
